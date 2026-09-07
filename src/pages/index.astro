@@ -166,7 +166,7 @@ const socialCount = SOCIALS.filter(social => social.active).length;
     @apply mb-3 inline-block rounded-full border border-skin-line px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-skin-accent;
   }
   #hero h1 {
-    @apply my-3 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl;
+    @apply my-3 text-3xl font-bold leading-tight sm:text-5xl;
   }
   .hero-intro {
     @apply my-4 max-w-md text-base leading-relaxed text-skin-base opacity-80;
@@ -187,7 +187,10 @@ const socialCount = SOCIALS.filter(social => social.active).length;
     @apply relative z-10 mx-auto w-full max-w-[280px] sm:max-w-[340px];
   }
   .photo-arc {
-    @apply absolute -inset-3 -z-10 rounded-[50%_50%_45%_45%_/_60%_60%_40%_40%] bg-skin-accent opacity-[0.12];
+    @apply absolute -inset-3 -z-10;
+    border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
+    background-color: rgb(var(--color-accent));
+    opacity: 0.12;
   }
   .hero-photo img {
     @apply w-full rounded-[2rem] border-2 border-skin-line object-cover shadow-xl;

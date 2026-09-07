@@ -3,7 +3,7 @@ export const SITE: Site = {
   website: "https://salviogoncalves.com.br", // replace this with your deployed domain
   author: "Salvio Gonçalves",
   desc: "Salvio Gonçalves, terapeuta. Reflexões sobre ansiedade, procrastinação, autoconhecimento e saúde emocional. Um espaço de acolhimento para uma vida mais leve.",
-  title: "Salvio Gonçalves | Terapeuta",
+  title: "Salvio Gonçalves",
   ogImage: "astropaper-og.jpg",
   lightAndDarkMode: true,
   postPerPage: 3,

@@ -5,27 +5,24 @@ import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import LinkButton from "@components/LinkButton.astro";
 ---
-
-<Layout title={`404 Not Found | ${SITE.title}`}>
+<Layout title={`404 — Página não encontrada | ${SITE.title}`}>
   <Header />
-
   <main id="main-content">
     <div class="not-found-wrapper">
-      <h1 aria-label="404 Not Found">404</h1>
-      <span aria-hidden="true">¯\_(ツ)_/¯</span>
-      <p>Page Not Found</p>
+      <h1 aria-label="404 Página não encontrada">404</h1>
+      <span aria-hidden="true">🌿</span>
+      <p>Parece que você se perdeu.</p>
+      <p class="not-found-sub">Respire — todo caminho tem volta.</p>
       <LinkButton
         href="/"
         className="my-6 text-lg underline decoration-dashed underline-offset-8"
       >
-        Go back home
+        Voltar para a página inicial
       </LinkButton>
     </div>
   </main>
-
   <Footer />
 </Layout>
-
 <style>
   #main-content {
     @apply mx-auto flex max-w-3xl flex-1 items-center justify-center;
@@ -38,5 +35,8 @@ import LinkButton from "@components/LinkButton.astro";
   }
   .not-found-wrapper p {
     @apply mt-4 text-2xl sm:text-3xl;
+  }
+  .not-found-sub {
+    @apply mt-1 text-base opacity-70 sm:text-lg;
   }
 </style>

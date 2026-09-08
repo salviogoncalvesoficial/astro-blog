@@ -22,13 +22,13 @@ export const LOGO_IMAGE = {
 export const SOCIALS: SocialObjects = [
   {
     name: "Instagram",
-    href: "https://instagram.com/SEU_USUARIO", // troque SEU_USUARIO pelo seu perfil real
+    href: "https://instagram.com/salviogoncalvesoficial", // troque SEU_USUARIO pelo seu perfil real
     linkTitle: `Salvio Gonçalves no Instagram`,
     active: true,
   },
   {
     name: "Mail",
-    href: "mailto:contato@salviogoncalves.com.br",
+    href: "contato@salviogoncalves.com.br",
     linkTitle: `Enviar e-mail para Salvio Gonçalves`,
     active: true,
   },

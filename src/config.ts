@@ -22,20 +22,20 @@ export const LOGO_IMAGE = {
 export const SOCIALS: SocialObjects = [
   {
     name: "Instagram",
-    href: "https://instagram.com/salviogoncalvesoficial", // troque SEU_USUARIO pelo seu perfil real
-    linkTitle: `Salvio Gonçalves no Instagram`,
+    href: "https://instagram.com/salviogoncalvesoficial",
+    linkTitle: "Salvio Gonçalves no Instagram",
     active: true,
   },
   {
     name: "Mail",
-    href: "contato@salviogoncalves.com.br",
-    linkTitle: `Enviar e-mail para Salvio Gonçalves`,
+    href: "mailto:contato@salviogoncalves.com.br",
+    linkTitle: "Enviar e-mail para Salvio Gonçalves",
     active: true,
   },
   {
     name: "WhatsApp",
     href: "https://wa.me/55SEUNUMERO", // quando me passar o número, ativo
-    linkTitle: `Salvio Gonçalves no WhatsApp`,
+    linkTitle: "Salvio Gonçalves no WhatsApp",
     active: false,
   },
 ];

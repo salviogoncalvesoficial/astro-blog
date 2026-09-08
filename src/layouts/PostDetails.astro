@@ -28,7 +28,7 @@ const {
 
 const { Content, headings } = await post.render();
 const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
-const showToc = post.data.toc ?? true;
+const showToc = (post.data as { toc?: boolean }).toc ?? true;
 
 const ogImageUrl = typeof ogImage === "string" ? ogImage : ogImage?.src;
 const ogUrl = new URL(
@@ -61,18 +61,6 @@ const relatedPosts = allPosts
   .sort((a, b) => b.overlap - a.overlap)
   .slice(0, 3)
   .map((item) => item.entry);
-
-const tocNav = showToc && tocHeadings.length > 0 && (
-  <nav class="toc" aria-label="Sumário do artigo">
-    <ul>
-      {tocHeadings.map((h) => (
-        <li class:list={{ "toc-sub": h.depth === 3 }}>
-          <a href={`#${h.slug}`}>{h.text}</a>
-        </li>
-      ))}
-    </ul>
-  </nav>
-);
 ---
 <Layout {...layoutProps}>
   <Header />
@@ -97,12 +85,22 @@ const tocNav = showToc && tocHeadings.length > 0 && (
         size="lg"
         className="my-2"
       />
-      {tocNav && (
-        <details class="toc-mobile">
-          <summary>Neste artigo</summary>
-          {tocNav}
-        </details>
-      )}
+      {
+        showToc && tocHeadings.length > 0 && (
+          <details class="toc-mobile">
+            <summary>Neste artigo</summary>
+            <nav class="toc" aria-label="Sumário do artigo">
+              <ul>
+                {tocHeadings.map((h) => (
+                  <li class:list={{ "toc-sub": h.depth === 3 }}>
+                    <a href={`#${h.slug}`}>{h.text}</a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </details>
+        )
+      }
       <article id="article" role="article" class="prose mt-8">
         <Content />
       </article>
@@ -134,45 +132,57 @@ const tocNav = showToc && tocHeadings.length > 0 && (
         </p>
         <a href="/about/" class="cta-btn">Conheça meu trabalho</a>
       </div>
-      {relatedPosts.length > 0 && (
-        <section class="related-posts">
-          <h2>Leia também</h2>
-          <div class="related-grid">
-            {relatedPosts.map(({ data, slug }) => {
-              const imgSrc =
-                typeof data.ogImage === "string"
-                  ? data.ogImage
-                  : data.ogImage?.src;
-              return (
-                <a href={`/posts/${slug}/`} class="related-card">
-                  <div class="related-thumb">
-                    {imgSrc ? (
-                      <img src={imgSrc} alt="" loading="lazy" />
-                    ) : (
-                      <span
-                        class="related-thumb-fallback"
-                        aria-hidden="true"
-                      ></span>
-                    )}
-                  </div>
-                  <div class="related-body">
-                    <h3>{data.title}</h3>
-                    <Datetime pubDatetime={data.pubDatetime} size="sm" />
-                  </div>
-                </a>
-              );
-            })}
-          </div>
-        </section>
-      )}
+      {
+        relatedPosts.length > 0 && (
+          <section class="related-posts">
+            <h2>Leia também</h2>
+            <div class="related-grid">
+              {relatedPosts.map(({ data, slug }) => {
+                const imgSrc =
+                  typeof data.ogImage === "string"
+                    ? data.ogImage
+                    : data.ogImage?.src;
+                return (
+                  <a href={`/posts/${slug}/`} class="related-card">
+                    <div class="related-thumb">
+                      {imgSrc ? (
+                        <img src={imgSrc} alt="" loading="lazy" />
+                      ) : (
+                        <span
+                          class="related-thumb-fallback"
+                          aria-hidden="true"
+                        ></span>
+                      )}
+                    </div>
+                    <div class="related-body">
+                      <h3>{data.title}</h3>
+                      <Datetime pubDatetime={data.pubDatetime} size="sm" />
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </section>
+        )
+      }
     </div>
     <aside class="post-sidebar">
-      {tocNav && (
-        <div class="sidebar-block">
-          <h2 class="sidebar-title">Neste artigo</h2>
-          {tocNav}
-        </div>
-      )}
+      {
+        showToc && tocHeadings.length > 0 && (
+          <div class="sidebar-block">
+            <h2 class="sidebar-title">Neste artigo</h2>
+            <nav class="toc" aria-label="Sumário do artigo">
+              <ul>
+                {tocHeadings.map((h) => (
+                  <li class:list={{ "toc-sub": h.depth === 3 }}>
+                    <a href={`#${h.slug}`}>{h.text}</a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+        )
+      }
       <div class="sidebar-block cta-card">
         <p class="cta-eyebrow">Atendimento</p>
         <h2>Um espaço seguro para suas questões</h2>

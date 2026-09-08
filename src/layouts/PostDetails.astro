@@ -7,12 +7,12 @@ import Datetime from "@components/Datetime";
 import type { CollectionEntry } from "astro:content";
 import { slugifyStr } from "@utils/slugify";
 import ShareLinks from "@components/ShareLinks.astro";
+import { getCollection } from "astro:content";
 import { SITE } from "@config";
 
 export interface Props {
   post: CollectionEntry<"blog">;
 }
-
 const { post } = Astro.props;
 
 const {
@@ -26,7 +26,9 @@ const {
   tags,
 } = post.data;
 
-const { Content } = await post.render();
+const { Content, headings } = await post.render();
+const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const showToc = post.data.toc ?? true;
 
 const ogImageUrl = typeof ogImage === "string" ? ogImage : ogImage?.src;
 const ogUrl = new URL(
@@ -44,16 +46,37 @@ const layoutProps = {
   ogImage: ogUrl,
   scrollSmooth: true,
 };
----
 
+// ---- Posts relacionados (mesmas tags) ----
+const allPosts = await getCollection("blog");
+const relatedPosts = allPosts
+  .filter(({ data }) => !data.draft)
+  .filter(({ slug }) => slug !== post.slug)
+  .map((entry) => ({
+    entry,
+    overlap: (entry.data.tags ?? []).filter((t) => (tags ?? []).includes(t))
+      .length,
+  }))
+  .filter((item) => item.overlap > 0)
+  .sort((a, b) => b.overlap - a.overlap)
+  .slice(0, 3)
+  .map((item) => item.entry);
+
+const tocNav = showToc && tocHeadings.length > 0 && (
+  <nav class="toc" aria-label="Sumário do artigo">
+    <ul>
+      {tocHeadings.map((h) => (
+        <li class:list={{ "toc-sub": h.depth === 3 }}>
+          <a href={`#${h.slug}`}>{h.text}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+);
+---
 <Layout {...layoutProps}>
   <Header />
-
-  <!-- <div class="progress-container fixed top-0 z-10 h-1 w-full bg-skin-fill">
-    <div class="progress-bar h-1 w-0 bg-skin-accent" id="myBar"></div>
-  </div> -->
-
-  <div class="mx-auto flex w-full max-w-3xl justify-start px-2">
+  <div class="mx-auto flex w-full max-w-5xl justify-start px-4">
     <button
       class="focus-outline mb-2 mt-8 flex hover:opacity-75"
       onclick="(() => (history.length === 1) ? window.location = '/' : history.back())()"
@@ -62,55 +85,208 @@ const layoutProps = {
         ><path
           d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z"
         ></path>
-      </svg><span>Go back</span>
+      </svg><span>Voltar</span>
     </button>
   </div>
-  <main id="main-content">
-    <h1 transition:name={slugifyStr(title)} class="post-title">{title}</h1>
-    <Datetime
-      pubDatetime={pubDatetime}
-      modDatetime={modDatetime}
-      size="lg"
-      className="my-2"
-    />
-    <article id="article" role="article" class="prose mx-auto mt-8 max-w-3xl">
-      <Content />
-    </article>
-
-    <ul class="my-8">
-      {tags.map(tag => <Tag tag={slugifyStr(tag)} />)}
-    </ul>
-
-    <div
-      class="flex flex-col-reverse items-center justify-between gap-6 sm:flex-row-reverse sm:items-end sm:gap-4"
-    >
-      <button
-        id="back-to-top"
-        class="focus-outline whitespace-nowrap py-1 hover:opacity-75"
+  <main id="main-content" class="post-layout">
+    <div class="post-main">
+      <h1 transition:name={slugifyStr(title)} class="post-title">{title}</h1>
+      <Datetime
+        pubDatetime={pubDatetime}
+        modDatetime={modDatetime}
+        size="lg"
+        className="my-2"
+      />
+      {tocNav && (
+        <details class="toc-mobile">
+          <summary>Neste artigo</summary>
+          {tocNav}
+        </details>
+      )}
+      <article id="article" role="article" class="prose mt-8">
+        <Content />
+      </article>
+      <ul class="my-8 flex flex-wrap gap-2">
+        {tags.map(tag => <Tag tag={slugifyStr(tag)} />)}
+      </ul>
+      <div
+        class="flex flex-col-reverse items-center justify-between gap-6 sm:flex-row-reverse sm:items-end sm:gap-4"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="rotate-90">
-          <path
-            d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z"
-          ></path>
-        </svg>
-        <span>Back to Top</span>
-      </button>
-
-      <ShareLinks />
+        <button
+          id="back-to-top"
+          class="focus-outline whitespace-nowrap py-1 hover:opacity-75"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="rotate-90">
+            <path
+              d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z"
+            ></path>
+          </svg>
+          <span>Voltar ao topo</span>
+        </button>
+        <ShareLinks />
+      </div>
+      <div class="cta-card cta-mobile">
+        <p class="cta-eyebrow">Atendimento</p>
+        <h2>Um espaço seguro para suas questões</h2>
+        <p class="cta-text">
+          Se algo deste artigo ressoou com você, talvez seja hora de conversar.
+          O primeiro passo é o mais importante.
+        </p>
+        <a href="/about/" class="cta-btn">Conheça meu trabalho</a>
+      </div>
+      {relatedPosts.length > 0 && (
+        <section class="related-posts">
+          <h2>Leia também</h2>
+          <div class="related-grid">
+            {relatedPosts.map(({ data, slug }) => {
+              const imgSrc =
+                typeof data.ogImage === "string"
+                  ? data.ogImage
+                  : data.ogImage?.src;
+              return (
+                <a href={`/posts/${slug}/`} class="related-card">
+                  <div class="related-thumb">
+                    {imgSrc ? (
+                      <img src={imgSrc} alt="" loading="lazy" />
+                    ) : (
+                      <span
+                        class="related-thumb-fallback"
+                        aria-hidden="true"
+                      ></span>
+                    )}
+                  </div>
+                  <div class="related-body">
+                    <h3>{data.title}</h3>
+                    <Datetime pubDatetime={data.pubDatetime} size="sm" />
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
+    <aside class="post-sidebar">
+      {tocNav && (
+        <div class="sidebar-block">
+          <h2 class="sidebar-title">Neste artigo</h2>
+          {tocNav}
+        </div>
+      )}
+      <div class="sidebar-block cta-card">
+        <p class="cta-eyebrow">Atendimento</p>
+        <h2>Um espaço seguro para suas questões</h2>
+        <p class="cta-text">
+          Se algo deste artigo ressoou com você, talvez seja hora de conversar.
+          O primeiro passo é o mais importante.
+        </p>
+        <a href="/about/" class="cta-btn">Conheça meu trabalho</a>
+      </div>
+    </aside>
   </main>
   <Footer />
 </Layout>
-
 <style>
-  main {
-    @apply mx-auto w-full max-w-3xl px-4 pb-12;
+  /* ===== Layout de duas colunas ===== */
+  .post-layout {
+    @apply mx-auto grid w-full max-w-5xl grid-cols-1 gap-8 px-4 pb-12;
+  }
+  .post-main {
+    @apply min-w-0;
+  }
+  .post-sidebar {
+    @apply hidden sm:block;
+  }
+  @media (min-width: 640px) {
+    .post-layout {
+      grid-template-columns: minmax(0, 1fr) 280px;
+    }
+    .post-sidebar {
+      @apply self-start;
+      position: sticky;
+      top: 2rem;
+      max-height: calc(100vh - 3rem);
+      overflow-y: auto;
+    }
   }
   .post-title {
-    @apply text-2xl font-semibold text-skin-accent;
+    @apply text-2xl font-semibold text-skin-accent sm:text-3xl;
+  }
+  /* ===== Sumário (TOC) ===== */
+  .toc-mobile {
+    @apply my-6 rounded-xl border border-skin-line bg-skin-card p-4 sm:hidden;
+  }
+  .toc-mobile summary {
+    @apply cursor-pointer font-semibold text-skin-accent;
+  }
+  .toc ul {
+    @apply mt-3 space-y-2;
+  }
+  .toc li a {
+    @apply block text-sm text-skin-base hover:text-skin-accent;
+  }
+  .toc li.toc-sub a {
+    @apply pl-4 text-xs opacity-80;
+  }
+  .sidebar-title {
+    @apply mb-3 text-sm font-semibold uppercase tracking-wide text-skin-accent;
+  }
+  .sidebar-block {
+    @apply mb-6 rounded-2xl border border-skin-line bg-skin-card p-5;
+  }
+  /* ===== Card de contato (CTA) ===== */
+  .cta-card {
+    @apply rounded-2xl border border-skin-line bg-skin-card p-5;
+  }
+  .cta-eyebrow {
+    @apply mb-1 text-xs font-medium uppercase tracking-[0.2em] text-skin-accent;
+  }
+  .cta-card h2 {
+    @apply text-lg font-semibold leading-snug;
+  }
+  .cta-text {
+    @apply mt-2 text-sm leading-relaxed opacity-80;
+  }
+  .cta-btn {
+    @apply mt-4 inline-block rounded-full bg-skin-accent px-5 py-2.5 text-sm font-medium text-skin-inverted transition-colors hover:opacity-90;
+  }
+  .cta-mobile {
+    @apply mt-8 sm:hidden;
+  }
+  /* ===== Posts relacionados ===== */
+  .related-posts {
+    @apply mt-12;
+  }
+  .related-posts h2 {
+    @apply mb-4 text-2xl font-semibold tracking-wide;
+  }
+  .related-grid {
+    @apply grid gap-4 sm:grid-cols-3;
+  }
+  .related-card {
+    @apply overflow-hidden rounded-2xl border border-skin-line bg-skin-card transition-shadow hover:shadow-md;
+  }
+  .related-thumb {
+    @apply aspect-[16/9] w-full overflow-hidden bg-skin-card;
+  }
+  .related-thumb img {
+    @apply h-full w-full object-cover;
+  }
+  .related-thumb-fallback {
+    @apply block h-full w-full;
+    background: linear-gradient(
+      135deg,
+      rgb(var(--color-accent) / 0.15),
+      rgb(var(--color-card) / 0.5)
+    );
+  }
+  .related-body {
+    @apply p-4;
+  }
+  .related-body h3 {
+    @apply text-sm font-semibold leading-snug hover:text-skin-accent;
   }
 </style>
-
 <script is:inline>
   /** Create a progress indicator
    *  at the top */
@@ -119,20 +295,16 @@ const layoutProps = {
     const progressContainer = document.createElement("div");
     progressContainer.className =
       "progress-container fixed top-0 z-10 h-1 w-full bg-skin-fill";
-
     // Create the progress bar div
     const progressBar = document.createElement("div");
     progressBar.className = "progress-bar h-1 w-0 bg-skin-accent";
     progressBar.id = "myBar";
-
     // Append the progress bar to the progress container
     progressContainer.appendChild(progressBar);
-
     // Append the progress container to the document body or any other desired parent element
     document.body.appendChild(progressContainer);
   }
   createProgressBar();
-
   /** Update the progress bar
    *  when user scrolls */
   function updateScrollProgress() {
@@ -150,7 +322,6 @@ const layoutProps = {
     }
   }
   document.addEventListener("scroll", updateScrollProgress);
-
   /** Attaches links to headings in the document,
    *  allowing sharing of sections easily */
   function addHeadingLinks() {
@@ -166,49 +337,39 @@ const layoutProps = {
     }
   }
   addHeadingLinks();
-
   /** Attaches copy buttons to code blocks in the document,
    * allowing users to copy code easily. */
   function attachCopyButtons() {
     let copyButtonLabel = "Copy";
     let codeBlocks = Array.from(document.querySelectorAll("pre"));
-
     for (let codeBlock of codeBlocks) {
       let wrapper = document.createElement("div");
       wrapper.style.position = "relative";
-
       let copyButton = document.createElement("button");
       copyButton.className =
         "copy-code absolute right-3 -top-3 rounded bg-skin-card px-2 py-1 text-xs leading-4 text-skin-base font-medium";
       copyButton.innerHTML = copyButtonLabel;
       codeBlock.setAttribute("tabindex", "0");
       codeBlock.appendChild(copyButton);
-
       // wrap codebock with relative parent element
       codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
       wrapper.appendChild(codeBlock);
-
       copyButton.addEventListener("click", async () => {
         await copyCode(codeBlock, copyButton);
       });
     }
-
     async function copyCode(block, button) {
       let code = block.querySelector("code");
       let text = code?.innerText;
-
       await navigator.clipboard.writeText(text ?? "");
-
       // visual feedback that task is completed
       button.innerText = "Copied";
-
       setTimeout(() => {
         button.innerText = copyButtonLabel;
       }, 700);
     }
   }
   attachCopyButtons();
-
   /** Scrolls the document to the top when
    * the "Back to Top" button is clicked. */
   function backToTop() {

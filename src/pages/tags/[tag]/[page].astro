@@ -1,14 +1,15 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
+import getSortedPosts from "@utils/getSortedPosts";
+import getUniqueTags from "@utils/getUniqueTags";
+import { SITE } from "@config";
 import Layout from "@layouts/Layout.astro";
 import Main from "@layouts/Main.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import Card from "@components/Card";
 import Pagination from "@components/Pagination.astro";
-import getSortedPosts from "@utils/getSortedPosts";
-import getUniqueTags from "@utils/getUniqueTags";
-import { SITE } from "@config";
+
 export interface Props {
   currentPage: number;
   totalPages: number;
@@ -16,6 +17,7 @@ export interface Props {
   tag: string;
   tagName: string;
 }
+
 export async function getStaticPaths({ paginate }: any) {
   const posts = await getCollection("blog");
   const tags = getUniqueTags(posts);
@@ -26,10 +28,18 @@ export async function getStaticPaths({ paginate }: any) {
     return paginate(sortedPosts, {
       params: { tag },
       pageSize: SITE.postPerPage,
-      props: { tagName: tag },
-    });
+      props: { tag, tagName: tag },
+    }).map((page) => ({
+      ...page,
+      props: {
+        ...page.props,
+        paginatedPosts: page.props.data,
+        totalPages: page.props.lastPage,
+      },
+    }));
   });
 }
+
 const { currentPage, totalPages, paginatedPosts, tag, tagName } = Astro.props;
 ---
 <Layout title={`Tag: ${tagName} | ${SITE.title}`}>

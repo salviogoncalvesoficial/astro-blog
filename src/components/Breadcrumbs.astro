@@ -4,6 +4,13 @@ const currentUrlPath = Astro.url.pathname.replace(/\/+$/, "");
 // Transforma o caminho em um array
 // ex.: /tags/tailwindcss => ['tags', 'tailwindcss']
 const breadcrumbList = currentUrlPath.split("/").slice(1);
+// Dicionário de tradução dos segmentos da URL
+const breadcrumbLabels: Record<string, string> = {
+  posts: "Artigos",
+  tags: "Tags",
+  about: "Sobre",
+  search: "Buscar",
+};
 // Se for Início > Artigos > página, substitui por "Artigos (página N)"
 breadcrumbList[0] === "posts" &&
   breadcrumbList.splice(0, 2, `Artigos (página ${breadcrumbList[1] || 1})`);
@@ -14,7 +21,7 @@ breadcrumbList[0] === "tags" &&
     1,
     3,
     `${breadcrumbList[1]} ${
-      Number(breadcrumbList[2]) === 1 ? "" : "(página " + breadcrumbList[2] + ")"
+      Number(breadcrumbList[2]) === 1 ? "" : `(página ${breadcrumbList[2]})`
     }`
   );
 ---
@@ -33,12 +40,14 @@ breadcrumbList[0] === "tags" &&
               aria-current="page"
             >
               {/* deixa a última parte em minúsculas em Início > Tags > alguma-tag */}
-              {decodeURIComponent(breadcrumb)}
+              {breadcrumbLabels[breadcrumb] ?? decodeURIComponent(breadcrumb)}
             </span>
           </li>
         ) : (
           <li>
-            <a href={`/${breadcrumb}/`}>{breadcrumb}</a>
+            <a href={`/${breadcrumb}/`}>
+              {breadcrumbLabels[breadcrumb] ?? breadcrumb}
+            </a>
             <span aria-hidden="true">&raquo;</span>
           </li>
         )

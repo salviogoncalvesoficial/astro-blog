@@ -2,14 +2,11 @@
 import { SOCIALS } from "@config";
 import LinkButton from "./LinkButton.astro";
 import socialIcons from "@assets/socialIcons";
-
 export interface Props {
   centered?: boolean;
 }
-
 const { centered = false } = Astro.props;
 ---
-
 <div class={`social-icons ${centered ? "flex" : ""}`}>
   {
     SOCIALS.filter(social => social.active).map(social => (
@@ -24,7 +21,6 @@ const { centered = false } = Astro.props;
     ))
   }
 </div>
-
 <style>
   .social-icons {
     @apply flex-wrap justify-center gap-1;

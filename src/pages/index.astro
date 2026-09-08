@@ -42,22 +42,6 @@ const socialCount = SOCIALS.filter(social => social.active).length;
             >
               Conheça meu trabalho
             </LinkButton>
-            <a
-              target="_blank"
-              href="/rss.xml"
-              class="rss-link"
-              aria-label="rss feed"
-              title="RSS Feed"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="rss-icon"
-                ><path
-                  d="M19 20.001C19 11.729 12.271 5 4 5v2c7.168 0 13 5.832 13 13.001h2z"
-                ></path><path
-                  d="M12 20.001h2C14 14.486 9.514 10 4 10v2c4.411 0 8 3.589 8 8.001z"
-                ></path><circle cx="6" cy="18" r="2"></circle>
-              </svg>
-              <span class="sr-only">RSS Feed</span>
-            </a>
           </div>
         </div>
         <div class="hero-photo">
@@ -176,12 +160,6 @@ const socialCount = SOCIALS.filter(social => social.active).length;
   }
   .hero-btn {
     @apply inline-flex items-center rounded-full bg-skin-accent px-6 py-3 text-sm font-medium text-skin-inverted transition-colors hover:opacity-90;
-  }
-  #hero .rss-link {
-    @apply inline-flex items-center;
-  }
-  #hero .rss-icon {
-    @apply h-6 w-6 scale-110 fill-skin-accent;
   }
   .hero-photo {
     @apply relative z-10 mx-auto w-full max-w-[280px] sm:max-w-[340px];

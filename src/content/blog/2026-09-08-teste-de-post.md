@@ -63,4 +63,4 @@ Cada vez que você pede, recebe e não acontece nada de ruim, o inconsciente atu
 
 Quer melhorar ainda mais sua relação com dinheiro e perder 100% da culpa ao prosperar? Assista o vídeo abaixo 👇
 
-<div class="video-wrap"><iframe  src="[https://www.youtube.com/embed/ZVCxQUyvKyM?si=NLuROvis2-1XGp0i](https://www.youtube.com/embed/ZVCxQUyvKyM?si=NLuROvis2-1XGp0i)" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+<div class="video-wrap"> <iframe src="[https://www.youtube.com/embed/ZVCxQUyvKyM](https://www.youtube.com/embed/ZVCxQUyvKyM)" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe> </div>

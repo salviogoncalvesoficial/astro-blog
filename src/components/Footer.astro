@@ -1,28 +1,23 @@
 ---
 import Hr from "./Hr.astro";
 import Socials from "./Socials.astro";
-
 const currentYear = new Date().getFullYear();
-
 export interface Props {
   noMarginTop?: boolean;
 }
-
 const { noMarginTop = false } = Astro.props;
 ---
-
-<footer class={`${noMarginTop ? "" : "mt-auto"}`}>
+<footer class={noMarginTop ? "" : "mt-auto"}>
   <Hr noPadding />
   <div class="footer-wrapper">
     <Socials centered />
     <div class="copyright-wrapper">
-      <span>Copyright &#169; {currentYear}</span>
+      <span>&#169; {currentYear} Salvio Gonçalves</span>
       <span class="separator">&nbsp;|&nbsp;</span>
-      <span>All rights reserved.</span>
+      <span>Todos os direitos reservados.</span>
     </div>
   </div>
 </footer>
-
 <style>
   footer {
     @apply w-full;

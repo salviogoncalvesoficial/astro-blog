@@ -3,7 +3,7 @@ author: Salvio Gonçalves
 pubDatetime: 2026-09-08
 modDatetime: 2026-09-08
 title: Teste de Post
-featured: false
+featured: true
 draft: false
 tags:
   - Testes

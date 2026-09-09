@@ -2,7 +2,7 @@
 author: Salvio gonçalves
 pubDatetime: 2026-09-10
 modDatetime: 2026-09-10
-title: "7 sinais de que você está em fase de expansão espiritual e energética. "
+title: Test de post 3
 featured: true
 draft: false
 tags:

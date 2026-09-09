@@ -9,12 +9,11 @@ import { slugifyStr } from "@utils/slugify";
 import ShareLinks from "@components/ShareLinks.astro";
 import { getCollection } from "astro:content";
 import { SITE } from "@config";
-
+import { getFirstImage } from "@utils/getFirstImage";
 export interface Props {
   post: CollectionEntry<"blog">;
 }
 const { post } = Astro.props;
-
 const {
   title,
   author,
@@ -25,17 +24,17 @@ const {
   modDatetime,
   tags,
 } = post.data;
-
 const { Content, headings } = await post.render();
 const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 const showToc = (post.data as { toc?: boolean }).toc ?? true;
-
 const ogImageUrl = typeof ogImage === "string" ? ogImage : ogImage?.src;
 const ogUrl = new URL(
   ogImageUrl ?? `/posts/${slugifyStr(title)}.png`,
   Astro.url.origin
 ).href;
-
+// ---- Capa automática: usa ogImage do frontmatter OU a primeira imagem do corpo ----
+const coverImage = ogImageUrl ?? getFirstImage(post.body);
+const coverFromBody = !!coverImage && !ogImageUrl;
 const layoutProps = {
   title: `${title} | ${SITE.title}`,
   author,
@@ -46,7 +45,6 @@ const layoutProps = {
   ogImage: ogUrl,
   scrollSmooth: true,
 };
-
 // ---- Posts relacionados (mesmas tags) ----
 const allPosts = await getCollection("blog");
 const relatedPosts = allPosts
@@ -78,6 +76,16 @@ const relatedPosts = allPosts
   </div>
   <main id="main-content" class="post-layout">
     <div class="post-main">
+      {
+        coverImage && (
+          <img
+            src={coverImage}
+            alt={title}
+            class="post-cover"
+            loading="eager"
+          />
+        )
+      }
       <h1 transition:name={slugifyStr(title)} class="post-title">{title}</h1>
       <Datetime
         pubDatetime={pubDatetime}
@@ -101,7 +109,11 @@ const relatedPosts = allPosts
           </details>
         )
       }
-      <article id="article" role="article" class="prose mt-8">
+      <article
+        id="article"
+        role="article"
+        class:list={["prose mt-8", { "hide-first-img": coverFromBody }]}
+      >
         <Content />
       </article>
       <ul class="my-8 flex flex-wrap gap-2">
@@ -221,6 +233,14 @@ const relatedPosts = allPosts
   }
   .post-title {
     @apply text-2xl font-semibold text-skin-accent sm:text-3xl;
+  }
+  /* ===== Capa automática ===== */
+  .post-cover {
+    @apply mb-6 w-full rounded-2xl border border-skin-line object-cover;
+    aspect-ratio: 16 / 9;
+  }
+  .hide-first-img img:first-of-type {
+    display: none;
   }
   /* ===== Sumário (TOC) ===== */
   .toc-mobile {

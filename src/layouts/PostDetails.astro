@@ -239,7 +239,8 @@ const relatedPosts = allPosts
     @apply mb-6 w-full rounded-2xl border border-skin-line object-cover;
     aspect-ratio: 16 / 9;
   }
-  .hide-first-img img:first-of-type {
+  /* :global é obrigatório — a imagem vem do markdown, fora do escopo do componente */
+  .hide-first-img :global(img:first-of-type) {
     display: none;
   }
   /* ===== Sumário (TOC) ===== */
@@ -367,6 +368,24 @@ const relatedPosts = allPosts
     }
   }
   addHeadingLinks();
+  /** Remove o H1 inicial do artigo quando ele duplica o título do post
+   *  (o título já aparece acima, inserido pelo layout) */
+  function dedupeTitle() {
+    const article = document.getElementById("article");
+    const postTitle = document.querySelector(".post-title");
+    if (!article || !postTitle) return;
+    const norm = (s) =>
+      s.replace(/\s+/g, " ").trim().replace(/[.,!:;*]/g, "").toLowerCase();
+    const firstH1 = article.querySelector("h1");
+    if (
+      firstH1 &&
+      norm(firstH1.textContent) === norm(postTitle.textContent)
+    ) {
+      firstH1.remove();
+    }
+  }
+  dedupeTitle();
+  document.addEventListener("astro:after-swap", dedupeTitle);
   /** Attaches copy buttons to code blocks in the document,
    * allowing users to copy code easily. */
   function attachCopyButtons() {
@@ -405,7 +424,7 @@ const relatedPosts = allPosts
   function backToTop() {
     document.querySelector("#back-to-top")?.addEventListener("click", () => {
       document.body.scrollTop = 0; // For Safari
-      document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+      document.documentElement.scrollTop = 0; // For Chrome, Firefox and Opera
     });
   }
   backToTop();

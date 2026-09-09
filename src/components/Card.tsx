@@ -6,9 +6,17 @@ export interface Props {
   frontmatter: CollectionEntry<"blog">["data"];
   secHeading?: boolean;
   image?: string;
+  className?: string;
 }
-export default function Card({ href, frontmatter, secHeading = true, image }: Props) {
-  const { title, pubDatetime, modDatetime, description, ogImage } = frontmatter;
+export default function Card({
+  href,
+  frontmatter,
+  secHeading = true,
+  image,
+  className,
+}: Props) {
+  const { title, pubDatetime, modDatetime, description, ogImage } =
+    frontmatter;
   const coverImage =
     (typeof ogImage === "string" ? ogImage : ogImage?.src) ?? image;
   const headerProps = {
@@ -16,7 +24,7 @@ export default function Card({ href, frontmatter, secHeading = true, image }: Pr
     className: "text-lg font-medium decoration-dashed hover:underline",
   };
   return (
-    <li className="my-6">
+    <li className={className ?? "my-6"}>
       {coverImage && (
         <a
           href={href}

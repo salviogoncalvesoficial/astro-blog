@@ -9,7 +9,7 @@ tags:
   - Test post 3
 description: Esse é o test 3 do meu blog
 ---
-# **7 sinais de que você está em fase de expansão espiritual e energética.** 
+# **7 sinais de que você está em fase de expansão espiritual e energética.**
 
 ![](/TEMA-06-1024x260.webp)
 
@@ -55,8 +55,5 @@ E isso é o trabalho mais bonito e mais assustador que existe.
 
   **Ação:** Escreva qual desses 7 sinais você está vivendo com mais intensidade agora. E escreva: o que essa fase está me pedindo para soltar? Não o que você precisa conquistar — o que você precisa largar. A expansão quase sempre começa com uma perda antes de se tornar um ganho. 
 
-  
-  
 Aproveita e assiste o vídeo abaixo, ele é justamente sobre isso, como continuar expandindo seu SER para prosperar e conquistar uma vida que você sonha. 
 
-<div class="video-wrap"><iframe src="https://www.youtube.com/embed/QEsbS99tQmI?si=Xo6zLDXFKkl5Vvie" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>

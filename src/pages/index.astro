@@ -8,6 +8,7 @@ import Hr from "@components/Hr.astro";
 import Card from "@components/Card";
 import Socials from "@components/Socials.astro";
 import getSortedPosts from "@utils/getSortedPosts";
+import { getFirstImage } from "@utils/getFirstImage";
 import { SOCIALS } from "@config";
 const posts = await getCollection("blog");
 const sortedPosts = getSortedPosts(posts);
@@ -72,10 +73,11 @@ const socialCount = SOCIALS.filter(social => social.active).length;
           <section id="featured">
             <h2>Destaques</h2>
             <ul>
-              {featuredPosts.map(({ data, slug }) => (
+              {featuredPosts.map((post) => (
                 <Card
-                  href={`/posts/${slug}/`}
-                  frontmatter={data}
+                  href={`/posts/${post.slug}/`}
+                  frontmatter={post.data}
+                  image={getFirstImage(post.body)}
                   secHeading={false}
                 />
               ))}
@@ -91,11 +93,12 @@ const socialCount = SOCIALS.filter(social => social.active).length;
           <h2>Posts Recentes</h2>
           <ul>
             {recentPosts.map(
-              ({ data, slug }, index) =>
+              (post, index) =>
                 index < 4 && (
                   <Card
-                    href={`/posts/${slug}/`}
-                    frontmatter={data}
+                    href={`/posts/${post.slug}/`}
+                    frontmatter={post.data}
+                    image={getFirstImage(post.body)}
                     secHeading={false}
                   />
                 )

@@ -196,11 +196,32 @@ const socialCount = SOCIALS.filter(social => social.active).length;
   }
   /* Destaques: 1 coluna no mobile, 2 no tablet, 3 no desktop */
   #featured ul {
-    @apply mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  @media (min-width: 640px) {
+    #featured ul {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    #featured ul {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
   }
   /* Recentes: 1 coluna no mobile, 2 no tablet/desktop */
   #recent-posts ul {
-    @apply mt-6 grid gap-6 sm:grid-cols-2;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  @media (min-width: 640px) {
+    #recent-posts ul {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
   .all-posts-btn-wrapper {
     @apply my-8 text-center;

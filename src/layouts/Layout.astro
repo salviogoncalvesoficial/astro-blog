@@ -2,9 +2,7 @@
 import { LOCALE, SITE } from "@config";
 import "@styles/base.css";
 import { ViewTransitions } from "astro:transitions";
-
 const googleSiteVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
-
 export interface Props {
   title?: string;
   author?: string;
@@ -15,7 +13,6 @@ export interface Props {
   modDatetime?: Date | null;
   scrollSmooth?: boolean;
 }
-
 const {
   title = SITE.title,
   author = SITE.author,
@@ -26,16 +23,14 @@ const {
   modDatetime,
   scrollSmooth = false,
 } = Astro.props;
-
 const socialImageURL = new URL(
   ogImage ?? SITE.ogImage ?? "og.png",
   Astro.url.origin
 ).href;
 ---
-
 <!doctype html>
 <html
-  lang=`${LOCALE.lang ?? "en"}`
+  lang={`${LOCALE.lang ?? "en"}`}
   class={`${scrollSmooth && "scroll-smooth"}`}
 >
   <head>
@@ -44,20 +39,17 @@ const socialImageURL = new URL(
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
-
     <!-- General Meta Tags -->
     <title>{title}</title>
     <meta name="title" content={title} />
     <meta name="description" content={description} />
     <meta name="author" content={author} />
     <link rel="sitemap" href="/sitemap-index.xml" />
-
     <!-- Open Graph / Facebook -->
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:image" content={socialImageURL} />
-
     <!-- Article Published/Modified time -->
     {
       pubDatetime && (
@@ -75,14 +67,12 @@ const socialImageURL = new URL(
         />
       )
     }
-
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content={canonicalURL} />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={socialImageURL} />
-
     <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -90,9 +80,7 @@ const socialImageURL = new URL(
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap"
       rel="stylesheet"
     />
-
     <meta name="theme-color" content="" />
-
     {
       // If PUBLIC_GOOGLE_SITE_VERIFICATION is set in the environment variable,
       // include google-site-verification tag in the heading
@@ -104,9 +92,7 @@ const socialImageURL = new URL(
         />
       )
     }
-
     <ViewTransitions />
-
     <script is:inline src="/toggle-theme.js"></script>
   </head>
   <body>

@@ -23,7 +23,20 @@ const { noMarginTop = false } = Astro.props;
     @apply w-full;
   }
   .footer-wrapper {
-    @apply flex flex-col items-center justify-between py-6 sm:flex-row-reverse sm:py-4;
+    @apply mx-auto w-full max-w-5xl px-4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+  @media (min-width: 640px) {
+    .footer-wrapper {
+      flex-direction: row-reverse;
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+    }
   }
   .link-button {
     @apply my-1 p-2 hover:rotate-6;

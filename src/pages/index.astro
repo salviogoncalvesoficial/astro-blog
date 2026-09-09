@@ -78,6 +78,7 @@ const socialCount = SOCIALS.filter(social => social.active).length;
                   href={`/posts/${post.slug}/`}
                   frontmatter={post.data}
                   image={getFirstImage(post.body)}
+                  className="my-0"
                   secHeading={false}
                 />
               ))}
@@ -99,6 +100,7 @@ const socialCount = SOCIALS.filter(social => social.active).length;
                     href={`/posts/${post.slug}/`}
                     frontmatter={post.data}
                     image={getFirstImage(post.body)}
+                    className="my-0"
                     secHeading={false}
                   />
                 )
@@ -123,7 +125,7 @@ const socialCount = SOCIALS.filter(social => social.active).length;
 <style>
   /* ===== Hero de boas-vindas ===== */
   #hero {
-    @apply relative overflow-hidden pb-10 pt-10 sm:pt-14;
+    @apply relative mx-auto w-full max-w-5xl overflow-hidden px-4 pb-10 pt-10 sm:pt-14;
   }
   .hero-shapes {
     @apply pointer-events-none absolute inset-0;
@@ -186,11 +188,19 @@ const socialCount = SOCIALS.filter(social => social.active).length;
   /* ===== Destaques & Posts Recentes ===== */
   #featured,
   #recent-posts {
-    @apply pb-6 pt-12;
+    @apply mx-auto w-full max-w-5xl px-4 pb-6 pt-12;
   }
   #featured h2,
   #recent-posts h2 {
     @apply text-2xl font-semibold tracking-wide;
+  }
+  /* Destaques: 1 coluna no mobile, 2 no tablet, 3 no desktop */
+  #featured ul {
+    @apply mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3;
+  }
+  /* Recentes: 1 coluna no mobile, 2 no tablet/desktop */
+  #recent-posts ul {
+    @apply mt-6 grid gap-6 sm:grid-cols-2;
   }
   .all-posts-btn-wrapper {
     @apply my-8 text-center;

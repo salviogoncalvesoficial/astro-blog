@@ -1,13 +1,15 @@
 ---
-author: Salvio gonçalves
-pubDatetime: 2026-09-10
-modDatetime: 2026-09-10
-title: Test de post 3
+author: Sálvio Gonçalves
+pubDatetime: 2026-09-09T18:00:00.000Z
+modDatetime: 2026-09-09T18:00:00.000Z
+title: 7 sinais de que você está em fase de expansão espiritual e energética
 featured: true
 draft: false
 tags:
-  - Test post 3
-description: Esse é o test 3 do meu blog
+  - expansão espiritual
+  - energia
+  - autoconhecimento
+description: A expansão espiritual raramente se parece com o que a gente imagina. Reconheça os 7 sinais de que você está crescendo — e não regredindo.
 ---
 # **7 sinais de que você está em fase de expansão espiritual e energética.**
 
@@ -55,5 +57,4 @@ E isso é o trabalho mais bonito e mais assustador que existe.
 
   **Ação:** Escreva qual desses 7 sinais você está vivendo com mais intensidade agora. E escreva: o que essa fase está me pedindo para soltar? Não o que você precisa conquistar — o que você precisa largar. A expansão quase sempre começa com uma perda antes de se tornar um ganho. 
 
-Aproveita e assiste o vídeo abaixo, ele é justamente sobre isso, como continuar expandindo seu SER para prosperar e conquistar uma vida que você sonha. 
-
+Aproveita e assiste o vídeo abaixo, ele é justamente sobre isso, como continuar expandindo seu SER para prosperar e conquistar uma vida que você sonha.

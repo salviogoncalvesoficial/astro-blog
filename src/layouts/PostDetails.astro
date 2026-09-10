@@ -149,15 +149,6 @@ const highlightPosts = [...related, ...featured, ...recent].slice(0, 3);
         </button>
         <ShareLinks />
       </div>
-      <div class="cta-card cta-mobile">
-        <p class="cta-eyebrow">Atendimento</p>
-        <h2>Um espaço seguro para suas questões</h2>
-        <p class="cta-text">
-          Se algo deste artigo ressoou com você, talvez seja hora de conversar.
-          O primeiro passo é o mais importante.
-        </p>
-        <a href="/about/" class="cta-btn">Conheça meu trabalho</a>
-      </div>
       {
         highlightPosts.length > 0 && (
           <section class="related-posts">
@@ -193,58 +184,17 @@ const highlightPosts = [...related, ...featured, ...recent].slice(0, 3);
       }
       <NewsletterBlock />
     </div>
-    <aside class="post-sidebar">
-      {
-        showToc && tocHeadings.length > 0 && (
-          <div class="sidebar-block">
-            <h2 class="sidebar-title">Neste artigo</h2>
-            <nav class="toc" aria-label="Sumário do artigo">
-              <ul>
-                {tocHeadings.map((h) => (
-                  <li class:list={{ "toc-sub": h.depth === 3 }}>
-                    <a href={`#${h.slug}`}>{h.text}</a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </div>
-        )
-      }
-      <div class="sidebar-block cta-card">
-        <p class="cta-eyebrow">Atendimento</p>
-        <h2>Um espaço seguro para suas questões</h2>
-        <p class="cta-text">
-          Se algo deste artigo ressoou com você, talvez seja hora de conversar.
-          O primeiro passo é o mais importante.
-        </p>
-        <a href="/about/" class="cta-btn">Conheça meu trabalho</a>
-      </div>
-    </aside>
+
   </main>
   <Footer />
 </Layout>
 <style>
-  /* ===== Layout de duas colunas ===== */
+  /* ===== Layout: coluna única centralizada ===== */
   .post-layout {
-    @apply mx-auto grid w-full max-w-5xl grid-cols-1 gap-8 px-4 pb-12;
+    @apply mx-auto w-full max-w-[61.25rem] grid-cols-1 px-4 pb-12;
   }
   .post-main {
     @apply min-w-0;
-  }
-  .post-sidebar {
-    @apply hidden sm:block;
-  }
-  @media (min-width: 640px) {
-    .post-layout {
-      grid-template-columns: minmax(0, 1fr) 280px;
-    }
-    .post-sidebar {
-      @apply self-start;
-      position: sticky;
-      top: 2rem;
-      max-height: calc(100vh - 3rem);
-      overflow-y: auto;
-    }
   }
   .post-title {
     @apply text-2xl font-semibold text-skin-accent sm:text-3xl;
@@ -274,30 +224,28 @@ const highlightPosts = [...related, ...featured, ...recent].slice(0, 3);
   .toc li.toc-sub a {
     @apply pl-4 text-xs opacity-80;
   }
-  .sidebar-title {
-    @apply mb-3 text-sm font-semibold uppercase tracking-wide text-skin-accent;
+  /* ===== Padronização: mídia na largura da coluna ===== */
+  .post-main :global(.video-wrap) {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    height: 0;
+    margin: 1.5rem 0;
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 1px solid rgb(var(--color-line));
   }
-  .sidebar-block {
-    @apply mb-6 rounded-2xl border border-skin-line bg-skin-card p-5;
+  .post-main :global(.video-wrap iframe) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
   }
-  /* ===== Card de contato (CTA) ===== */
-  .cta-card {
-    @apply rounded-2xl border border-skin-line bg-skin-card p-5;
-  }
-  .cta-eyebrow {
-    @apply mb-1 text-xs font-medium uppercase tracking-[0.2em] text-skin-accent;
-  }
-  .cta-card h2 {
-    @apply text-lg font-semibold leading-snug;
-  }
-  .cta-text {
-    @apply mt-2 text-sm leading-relaxed opacity-80;
-  }
-  .cta-btn {
-    @apply mt-4 inline-block rounded-full bg-skin-accent px-5 py-2.5 text-sm font-medium text-skin-inverted transition-colors hover:opacity-90;
-  }
-  .cta-mobile {
-    @apply mt-8 sm:hidden;
+  .post-main :global(img) {
+    width: 100%;
+    border-radius: 1rem;
   }
   /* ===== Destaques (fim do post) ===== */
   .related-posts {

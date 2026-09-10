@@ -16,3 +16,4 @@ export const SOCIALS: SocialObjects = [
   { name: "Mail", href: "mailto:contato@salviogoncalves.com.br", linkTitle: "Enviar e-mail para Salvio Gonçalves", active: true },
   { name: "WhatsApp", href: "https://wa.me/55SEUNUMERO", linkTitle: "Salvio Gonçalves no WhatsApp", active: false },
 ];
+// Blog pronto para receber os novos artigos do projeto.

@@ -2,34 +2,48 @@ import { getStore, connectLambda } from "@netlify/blobs";
 
 /**
  * Webhook de recebimento do Resend (Inbound).
- * Cada e-mail enviado para @salviogoncalves.com.br chega aqui
- * e é salvo na caixa de entrada do /admin.
- *
- * Formato do payload do Resend (Inbound):
- * { type: "email.received", created_at, data: {
- *     id, object: "message", from, to: [], subject, text, html, headers: {...} } }
+ * O webhook traz só os metadados (from/to/subject) — o corpo (text/html)
+ * vem da API "Received emails": GET /emails/receiving/:id
  */
 export async function handler(event) {
   try {
     try { connectLambda(event); } catch {}
 
     const body = JSON.parse(event.body || "{}");
-    // o conteúdo vem dentro de "data"; se não vier, usa o body direto (compatibilidade)
     const msg = body.data ?? body;
+    const emailId = msg.email_id ?? msg.id;
 
+    // 1. Busca o conteúdo completo na API do Resend
+    let text = "";
+    let html = "";
+    if (emailId && process.env.RESEND_API_KEY) {
+      try {
+        const res = await fetch(`https://api.resend.com/emails/receiving/${emailId}`, {
+          headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+        });
+        if (res.ok) {
+          const full = await res.json();
+          text = full.text ?? "";
+          html = full.html ?? "";
+        } else {
+          console.error("[inbox] falha ao buscar conteúdo:", res.status);
+        }
+      } catch (err) {
+        console.error("[inbox] erro ao buscar conteúdo:", err?.message);
+      }
+    }
+
+    // 2. Salva na caixa de entrada
     const store = getStore("inbox");
-    const id = msg.id || body.id || `mail-${Date.now()}`;
-
-    // "from" pode vir como "Nome <email@x>" ou só o e-mail
-    const from = msg.from ?? "desconhecido";
+    const id = emailId || `mail-${Date.now()}`;
 
     await store.setJSON(id, {
       id,
-      from,
+      from: msg.from ?? "desconhecido",
       to: Array.isArray(msg.to) ? msg.to.join(", ") : msg.to ?? "",
       subject: msg.subject || "(sem assunto)",
-      text: msg.text ?? "",
-      html: msg.html ?? "",
+      text,
+      html,
       receivedAt: body.created_at ?? new Date().toISOString(),
       read: false,
     });

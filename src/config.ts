@@ -9,33 +9,10 @@ export const SITE: Site = {
   postPerPage: 12,
   scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
 };
-export const LOCALE = {
-  lang: "pt-br", // Set this empty and default will be "en"
-  langTag: ["pt-BR"], // BCP 47 Language Tags. Set this empty [] to use the environment default
-} as const;
-export const LOGO_IMAGE = {
-  enable: true,
-  svg: true,
-  width: 216,
-  height: 52,
-};
+export const LOCALE = { lang: "pt-br", langTag: ["pt-BR"] } as const;
+export const LOGO_IMAGE = { enable: true, svg: true, width: 300, height: 72 };
 export const SOCIALS: SocialObjects = [
-  {
-    name: "Instagram",
-    href: "https://instagram.com/salviogoncalvesoficial",
-    linkTitle: "Salvio Gonçalves no Instagram",
-    active: true,
-  },
-  {
-    name: "Mail",
-    href: "mailto:contato@salviogoncalves.com.br",
-    linkTitle: "Enviar e-mail para Salvio Gonçalves",
-    active: true,
-  },
-  {
-    name: "WhatsApp",
-    href: "https://wa.me/55SEUNUMERO", // quando me passar o número, ativo
-    linkTitle: "Salvio Gonçalves no WhatsApp",
-    active: false,
-  },
+  { name: "Instagram", href: "https://instagram.com/salviogoncalvesoficial", linkTitle: "Salvio Gonçalves no Instagram", active: true },
+  { name: "Mail", href: "mailto:contato@salviogoncalves.com.br", linkTitle: "Enviar e-mail para Salvio Gonçalves", active: true },
+  { name: "WhatsApp", href: "https://wa.me/55SEUNUMERO", linkTitle: "Salvio Gonçalves no WhatsApp", active: false },
 ];

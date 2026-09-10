@@ -1,0 +1,46 @@
+---
+// ============================================================
+// BLOCO DE NEWSLETTER — aparece automaticamente quando ativado.
+// COMO ATIVAR: crie o formulário embutido no MailerLite
+// (Formulários → Incorporado → copiar código HTML) e cole o
+// código completo na constante abaixo, entre as crases.
+// Enquanto estiver vazia, o bloco não aparece em lugar nenhum.
+// ============================================================
+const formEmbedHtml = ``;
+---
+{
+  formEmbedHtml && (
+    <section class="newsletter" aria-label="Assine a newsletter">
+      <div class="newsletter-card">
+        <p class="newsletter-eyebrow">Newsletter</p>
+        <h2>Receba os novos artigos em primeira mão</h2>
+        <p class="newsletter-text">
+          Toda vez que eu publicar um texto novo, você recebe direto no seu
+          e-mail. Sem spam — só reflexões para uma vida mais leve e
+          consciente.
+        </p>
+        <div class="newsletter-form" set:html={formEmbedHtml} />
+      </div>
+    </section>
+  )
+}
+<style>
+  .newsletter {
+    @apply mx-auto w-full max-w-5xl px-4 pb-4 pt-12;
+  }
+  .newsletter-card {
+    @apply rounded-2xl border border-skin-line bg-skin-card p-8 text-center sm:p-10;
+  }
+  .newsletter-eyebrow {
+    @apply mb-2 text-xs font-medium uppercase tracking-[0.2em] text-skin-accent;
+  }
+  .newsletter-card h2 {
+    @apply text-xl font-semibold sm:text-2xl;
+  }
+  .newsletter-text {
+    @apply mx-auto mt-3 max-w-md text-sm leading-relaxed opacity-80;
+  }
+  .newsletter-form {
+    @apply mt-6;
+  }
+</style>

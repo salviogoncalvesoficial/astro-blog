@@ -38,7 +38,7 @@ const { activeNav, sticky = false } = Astro.props;
           <line x1="6" y1="6" x2="18" y2="18" class="close"></line>
         </svg>
       </button>
-      <a href="/" class="logo whitespace-nowrap">
+      <a href="/" class="logo whitespace-nowrap" aria-label={SITE.title}>
         {
           LOGO_IMAGE.enable ? (
             <img
@@ -65,7 +65,7 @@ const { activeNav, sticky = false } = Astro.props;
             xmlns="http://www.w3.org/2000/svg"
             class="scale-110 sm:scale-100"
           ><path
-            d="M19.023 16.977a35.13 35.13 0 0 1-1.367-1.384c-.372-.378-.596-.653-.596-.653l-2.8-1.337A6.962 6.962 0 0 0 16 9c0-3.859-3.14-7-7-7S2 5.141 2 9s3.14 7 7 7c1.763 0 3.37-.66 4.603-1.739l1.337 2.8s.275.224.653.596c.387.363.896.854 1.384 1.367l1.358 1.392.604.646 2.121-2.121-.646-.604c-.379-.372-.885-.866-1.391-1.36zM9 14c-2.757 0-5-2.243-5-5s2.243-5 5-5 5 2.243 5 5-2.243 5-5 5z"
+            d="M19.023 16.977a35.13 35.13 0 0 1-1.367-1.384c-.372-.378-.596-.653-.653-.275s-.224-.275-.596-.653l-2.8-1.337A6.962 6.962 0 0 0 16 9c0-3.859-3.14-7-7-7S2 5.141 2 9s3.14 7 7 7c1.763 0 3.37-.66 4.603-1.739l1.337 2.8s.275.224.653.596c.387.363.896.854 1.384 1.367l1.358 1.392.604.646 2.121-2.121-.646-.604c-.379-.372-.885-.866-1.391-1.36zM9 14c-2.757 0-5-2.243-5-5s2.243-5 5-5 5 2.243 5 5-2.243 5-5 5z"
           ></path>
           </svg>
           <span class="sr-only">Buscar</span>
@@ -140,6 +140,13 @@ const { activeNav, sticky = false } = Astro.props;
   }
   .logo {
     @apply absolute left-1/2 top-1/2 z-10 max-w-[52%] -translate-x-1/2 -translate-y-1/2 truncate text-center text-base font-semibold sm:max-w-[60%] sm:text-2xl;
+  }
+  .logo img {
+    display: block;
+    width: min(216px, 100%);
+    height: auto;
+    max-height: 52px;
+    object-fit: contain;
   }
   .top-actions {
     @apply z-20 ml-auto flex items-center gap-0 sm:gap-2;

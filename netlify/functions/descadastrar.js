@@ -1,9 +1,11 @@
-import { unsubscribe, emailFromToken, emailTemplate, sendEmail } from "./lib/newsletter.js";
+import { unsubscribe, emailFromToken, emailTemplate, sendEmail, initBlobs } from "./lib/newsletter.js";
 
 /**
  * GET /descadastrar?token=...  → confirma o descadastro e mostra a página
  */
 export async function handler(event) {
+  initBlobs(event);
+
   const params = new URLSearchParams(event.queryStringParameters || {});
   const token = params.get("token");
   const email = token ? emailFromToken(token) : null;

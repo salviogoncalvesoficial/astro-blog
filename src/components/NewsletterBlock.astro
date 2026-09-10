@@ -2,9 +2,10 @@
 // ============================================================
 // BLOCO DE NEWSLETTER — ativo e conectado ao sistema próprio
 // (Netlify Function /inscrever → Blobs → Resend)
+// Envio via AJAX: feedback instantâneo, sem recarregar a página
 // ============================================================
 const formEmbedHtml = `
-<form method="POST" action="/.netlify/functions/inscrever" class="nl-form" id="nl-form">
+<form class="nl-form" id="nl-form" novalidate>
   <input type="text" name="website" class="nl-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
   <input type="email" name="email" required placeholder="Seu melhor e-mail" class="nl-input" autocapitalize="off" autocorrect="off" spellcheck="false" />
   <button type="submit" class="nl-btn">Inscrever</button>
@@ -61,6 +62,9 @@ const formEmbedHtml = `
   .newsletter-form :global(.nl-btn) {
     @apply rounded-full bg-skin-accent px-6 py-3 text-sm font-medium text-skin-inverted transition-opacity hover:opacity-90;
   }
+  .newsletter-form :global(.nl-btn:disabled) {
+    @apply opacity-60;
+  }
   .newsletter-form :global(.nl-honeypot) {
     @apply hidden;
   }
@@ -81,33 +85,57 @@ const formEmbedHtml = `
   }
 </style>
 <script>
-  // Mostra a confirmação/erro quando a função redireciona de volta
-  function newsletterFeedback() {
-    const params = new URLSearchParams(window.location.search);
-    const status = params.get("newsletter");
-    if (!status) return;
-    const section = document.getElementById("newsletter");
+  // Inscrição via AJAX: feedback instantâneo dentro da própria caixa,
+  // sem recarregar a página (imune a cache de redirect)
+  function bindNewsletter() {
     const form = document.getElementById("nl-form");
-    const success = document.getElementById("nl-success");
-    const error = document.getElementById("nl-error");
-    const privacy = document.getElementById("nl-privacy");
-    if (status === "ok" && success) {
-      form?.classList.add("display-none");
-      privacy?.classList.add("display-none");
-      success.classList.remove("display-none");
-    } else if (status === "erro" && error) {
-      const received = params.get("email");
-      const msg = document.getElementById("nl-error-msg");
-      if (msg && received) {
-        msg.textContent = `Recebemos “${received}”, que não parece um e-mail válido. Confira se foi digitado corretamente (ex.: nome@gmail.com) e tente de novo.`;
+    if (!form || form.dataset.bound) return;
+    form.dataset.bound = "1";
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = form.querySelector(".nl-input");
+      const btn = form.querySelector(".nl-btn");
+      const success = document.getElementById("nl-success");
+      const error = document.getElementById("nl-error");
+      const errorMsg = document.getElementById("nl-error-msg");
+      const privacy = document.getElementById("nl-privacy");
+      if (!input || !btn) return;
+
+      const raw = input.value;
+      btn.disabled = true;
+      btn.textContent = "Enviando...";
+
+      try {
+        const res = await fetch("/.netlify/functions/inscrever", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
+          body: `email=${encodeURIComponent(raw)}`,
+        });
+        const data = await res.json();
+
+        if (data.status === "ok") {
+          form.classList.add("display-none");
+          privacy?.classList.add("display-none");
+          success?.classList.remove("display-none");
+        } else {
+          const cleaned = (data.email || "").replace(/[\s\u200B-\u200D\uFEFF]+/g, "");
+          if (errorMsg) {
+            errorMsg.textContent = cleaned
+              ? `Recebemos “${cleaned}”, que não parece um e-mail válido. Confira a digitação (ex.: nome@gmail.com) e tente de novo.`
+              : "Ops — este e-mail não parece válido. Tente novamente, por favor.";
+          }
+          error?.classList.remove("display-none");
+        }
+      } catch {
+        error?.classList.remove("display-none");
+        if (errorMsg) errorMsg.textContent = "Não consegui enviar agora. Verifique sua conexão e tente de novo.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Inscrever";
       }
-      error.classList.remove("display-none");
-    }
-    // leva o usuário direto ao bloco (sem depender da âncora do redirect)
-    section?.scrollIntoView({ behavior: "smooth", block: "start" });
-    // limpa a URL para o recarregar não repetir a mensagem
-    window.history.replaceState({}, "", window.location.pathname + "#newsletter");
+    });
   }
-  newsletterFeedback();
-  document.addEventListener("astro:after-swap", newsletterFeedback);
+  bindNewsletter();
+  document.addEventListener("astro:after-swap", bindNewsletter);
 </script>

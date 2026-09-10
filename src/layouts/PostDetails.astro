@@ -45,11 +45,15 @@ const layoutProps = {
   ogImage: ogUrl,
   scrollSmooth: true,
 };
-// ---- Posts relacionados (mesmas tags) ----
+// ---- Destaques do fim do post: sempre 3 convites de leitura ----
+// Régua: 1º posts com tags em comum, 2º marcados como destaque, 3º mais recentes
 const allPosts = await getCollection("blog");
-const relatedPosts = allPosts
+const otherPosts = allPosts
   .filter(({ data }) => !data.draft)
-  .filter(({ slug }) => slug !== post.slug)
+  .filter(({ slug }) => slug !== post.slug);
+const byDateDesc = (a: CollectionEntry<"blog">, b: CollectionEntry<"blog">) =>
+  (b.data.pubDatetime?.getTime() ?? 0) - (a.data.pubDatetime?.getTime() ?? 0);
+const related = otherPosts
   .map((entry) => ({
     entry,
     overlap: (entry.data.tags ?? []).filter((t) => (tags ?? []).includes(t))
@@ -57,8 +61,17 @@ const relatedPosts = allPosts
   }))
   .filter((item) => item.overlap > 0)
   .sort((a, b) => b.overlap - a.overlap)
-  .slice(0, 3)
   .map((item) => item.entry);
+const picked = new Set(related.map(({ slug }) => slug));
+const featured = otherPosts
+  .filter(({ data }) => data.featured)
+  .filter(({ slug }) => !picked.has(slug))
+  .sort(byDateDesc);
+featured.forEach(({ slug }) => picked.add(slug));
+const recent = otherPosts
+  .filter(({ slug }) => !picked.has(slug))
+  .sort(byDateDesc);
+const highlightPosts = [...related, ...featured, ...recent].slice(0, 3);
 ---
 <Layout {...layoutProps}>
   <Header />
@@ -145,15 +158,15 @@ const relatedPosts = allPosts
         <a href="/about/" class="cta-btn">Conheça meu trabalho</a>
       </div>
       {
-        relatedPosts.length > 0 && (
+        highlightPosts.length > 0 && (
           <section class="related-posts">
-            <h2>Leia também</h2>
+            <h2>Destaques</h2>
             <div class="related-grid">
-              {relatedPosts.map(({ data, slug }) => {
+              {highlightPosts.map(({ data, slug, body }) => {
                 const imgSrc =
                   typeof data.ogImage === "string"
                     ? data.ogImage
-                    : data.ogImage?.src;
+                    : data.ogImage?.src ?? getFirstImage(body ?? "");
                 return (
                   <a href={`/posts/${slug}/`} class="related-card">
                     <div class="related-thumb">
@@ -284,7 +297,7 @@ const relatedPosts = allPosts
   .cta-mobile {
     @apply mt-8 sm:hidden;
   }
-  /* ===== Posts relacionados ===== */
+  /* ===== Destaques (fim do post) ===== */
   .related-posts {
     @apply mt-12;
   }

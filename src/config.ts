@@ -6,7 +6,7 @@ export const SITE: Site = {
   title: "Salvio Gonçalves",
   ogImage: "astropaper-og.jpg",
   lightAndDarkMode: true,
-  postPerPage: 3,
+  postPerPage: 12,
   scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
 };
 export const LOCALE = {

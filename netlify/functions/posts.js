@@ -63,6 +63,7 @@ function buildFrontmatter(fm) {
   out += `pubDatetime: ${fm.pubDatetime}\n`;
   out += `modDatetime: ${fm.modDatetime}\n`;
   out += `title: ${fm.title}\n`;
+  if (fm.ogImage) out += `ogImage: "${fm.ogImage}"\n`;
   out += `featured: ${fm.featured}\n`;
   out += `draft: ${fm.draft}\n`;
   out += "tags:\n";
@@ -102,6 +103,7 @@ export async function handler(event) {
           file: f.name, title: fm.title || f.name, draft: Boolean(fm.draft),
           featured: Boolean(fm.featured), tags: Array.isArray(fm.tags) ? fm.tags : (fm.tags ? [fm.tags] : []),
           pubDatetime: fm.pubDatetime || null, description: fm.description || "",
+          ogImage: fm.ogImage || null,
         });
       }
       posts.sort((a, b) => String(b.pubDatetime).localeCompare(String(a.pubDatetime)));
@@ -113,6 +115,7 @@ export async function handler(event) {
       const { fm, body: md } = parseFrontmatter(raw);
       return json(200, { ok: true, file: body.file, sha: file.sha, post: {
         author: fm.author || "", title: fm.title || "", description: fm.description || "",
+        ogImage: fm.ogImage || "",
         pubDatetime: fm.pubDatetime || "", featured: Boolean(fm.featured), draft: Boolean(fm.draft),
         tags: Array.isArray(fm.tags) ? fm.tags : (fm.tags ? [fm.tags] : []), body: md,
       }});
@@ -126,6 +129,7 @@ export async function handler(event) {
         pubDatetime: p.pubDatetime ? isoDate(p.pubDatetime) : now,
         modDatetime: now,
         title: p.title,
+        ogImage: p.ogImage || "",
         featured: Boolean(p.featured), draft: Boolean(p.draft),
         tags: (Array.isArray(p.tags) ? p.tags : String(p.tags || "").split(",")).map(t => t.trim()).filter(Boolean),
         description: p.description || "",

@@ -4,17 +4,22 @@
 // (Netlify Function /inscrever → Blobs → Resend)
 // ============================================================
 const formEmbedHtml = `
-<form method="POST" action="/.netlify/functions/inscrever" class="nl-form">
+<form method="POST" action="/.netlify/functions/inscrever" class="nl-form" id="nl-form">
   <input type="text" name="website" class="nl-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
   <input type="email" name="email" required placeholder="Seu melhor e-mail" class="nl-input" />
   <button type="submit" class="nl-btn">Inscrever</button>
 </form>
-<p class="nl-privacy">Sem spam. Você pode cancelar com 1 clique, a qualquer momento.</p>
+<div class="nl-success display-none" id="nl-success">
+  <p class="nl-success-title">Inscrição confirmada! 🎉</p>
+  <p class="nl-success-text">A partir de agora, os novos artigos chegam direto no seu e-mail. Confira sua caixa de entrada — acolhimento em breve!</p>
+</div>
+<p class="nl-error display-none" id="nl-error">Ops — este e-mail não parece válido. Tente novamente, por favor.</p>
+<p class="nl-privacy" id="nl-privacy">Sem spam. Você pode cancelar com 1 clique, a qualquer momento.</p>
 `;
 ---
 {
   formEmbedHtml && (
-    <section class="newsletter" aria-label="Assine a newsletter">
+    <section class="newsletter" aria-label="Assine a newsletter" id="newsletter">
       <div class="newsletter-card">
         <p class="newsletter-eyebrow">Newsletter</p>
         <h2>Receba os novos artigos em primeira mão</h2>
@@ -62,4 +67,39 @@ const formEmbedHtml = `
   .newsletter-form :global(.nl-privacy) {
     @apply mt-3 text-xs opacity-60;
   }
+  .newsletter-form :global(.nl-success) {
+    @apply mx-auto mt-6 max-w-md rounded-xl border border-skin-accent bg-skin-fill p-4;
+  }
+  .newsletter-form :global(.nl-success-title) {
+    @apply m-0 font-semibold text-skin-accent;
+  }
+  .newsletter-form :global(.nl-success-text) {
+    @apply m-0 mt-1 text-sm opacity-80;
+  }
+  .newsletter-form :global(.nl-error) {
+    @apply mx-auto mt-6 max-w-md rounded-xl border border-red-400 bg-skin-fill p-4 text-sm text-red-600;
+  }
 </style>
+<script>
+  // Mostra a confirmação quando a função redireciona de volta com ?newsletter=ok|erro
+  function newsletterFeedback() {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("newsletter");
+    if (!status) return;
+    const form = document.getElementById("nl-form");
+    const success = document.getElementById("nl-success");
+    const error = document.getElementById("nl-error");
+    const privacy = document.getElementById("nl-privacy");
+    if (status === "ok" && success) {
+      form?.classList.add("display-none");
+      privacy?.classList.add("display-none");
+      success.classList.remove("display-none");
+    } else if (status === "erro" && error) {
+      error.classList.remove("display-none");
+    }
+    // limpa a URL para o recarregar não repetir a mensagem
+    window.history.replaceState({}, "", window.location.pathname + "#newsletter");
+  }
+  newsletterFeedback();
+  document.addEventListener("astro:after-swap", newsletterFeedback);
+</script>

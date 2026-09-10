@@ -22,7 +22,7 @@ async function listMessages() {
     const data = await store.get(blob.key, { type: "json" });
     if (data) msgs.push({ folder: "inbox", favorite: false, ...data });
   }
-  msgs.sort((a, b) => (b.receivedAt ?? "").localeCompare(a.receivedAt ?? ""));
+  msgs.sort((a, b) => (b.receivedAt ?? b.sentAt ?? "").localeCompare(a.receivedAt ?? a.sentAt ?? ""));
   return msgs;
 }
 
@@ -53,7 +53,7 @@ export async function handler(event) {
   if (action === "set-meta") {
     const msg = await store.get(id, { type: "json" });
     if (!msg) return json(404, { ok: false, error: "Mensagem não encontrada" });
-    const allowedFolder = ["inbox", "archive", "trash"].includes(value) ? value : msg.folder || "inbox";
+    const allowedFolder = ["inbox", "archive", "trash", "sent"].includes(value) ? value : msg.folder || "inbox";
     await store.setJSON(id, { ...msg, folder: allowedFolder, favorite: value === "favorite" ? !Boolean(msg.favorite) : Boolean(msg.favorite) });
     return json(200, { ok: true });
   }
@@ -66,6 +66,25 @@ export async function handler(event) {
       body: JSON.stringify({ from: "Salvio Goncalves <contato@salviogoncalves.com.br>", to: [to], subject: subject || "Re: sua mensagem", text }),
     });
     if (!res.ok) return json(502, { ok: false, error: "Falha ao enviar a resposta" });
+    return json(200, { ok: true });
+  }
+  if (action === "send") {
+    if (!to || !text) return json(400, { ok: false, error: "Destinatário e mensagem são obrigatórios" });
+    const emails = to.split(/[,;\s]+/).map(e => e.trim().toLowerCase()).filter(e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+    if (!emails.length) return json(400, { ok: false, error: "Nenhum e-mail de destino válido" });
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: "Salvio Goncalves <contato@salviogoncalves.com.br>", to: emails, subject: subject || "(sem assunto)", text }),
+    });
+    if (!res.ok) return json(502, { ok: false, error: "Falha ao enviar o e-mail" });
+    const sentId = "sent-" + crypto.randomUUID();
+    await store.setJSON(sentId, {
+      id: sentId, folder: "sent", read: true, favorite: false,
+      from: "Salvio Goncalves <contato@salviogoncalves.com.br>",
+      to: emails.join(", "), subject: subject || "(sem assunto)", text,
+      sentAt: new Date().toISOString(),
+    });
     return json(200, { ok: true });
   }
   return json(400, { ok: false, error: "Ação desconhecida" });

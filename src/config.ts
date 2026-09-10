@@ -4,7 +4,7 @@ export const SITE: Site = {
   author: "Salvio Gonçalves",
   desc: "Salvio Gonçalves, terapeuta. Reflexões sobre ansiedade, procrastinação, autoconhecimento e saúde emocional. Um espaço de acolhimento para uma vida mais leve.",
   title: "Salvio Gonçalves",
-  ogImage: "astropaper-og.jpg",
+  ogImage: "1789059341135-og-image-salvio.png",
   lightAndDarkMode: true,
   postPerPage: 12,
   scheduledPostMargin: 15 * 60 * 1000,

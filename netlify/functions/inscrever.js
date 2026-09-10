@@ -1,10 +1,12 @@
-import { subscribe, sendEmail, emailTemplate, SITE_URL } from "./lib/newsletter.js";
+import { subscribe, sendEmail, emailTemplate, SITE_URL, initBlobs } from "./lib/newsletter.js";
 
 /**
  * POST /api/inscrever  (via redirect do formulário)
  * Body: email=...
  */
 export async function handler(event) {
+  initBlobs(event);
+
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Método não permitido" };
   }

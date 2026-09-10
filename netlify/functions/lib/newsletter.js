@@ -3,10 +3,19 @@
  * Lista de inscritos: Netlify Blobs (privado, fora do repo público)
  * Envio: Resend (API)
  */
-import { getStore } from "@netlify/blobs";
+import { getStore, connectLambda } from "@netlify/blobs";
 
 export const FROM_EMAIL = "Newsletter Salvio Goncalves <news@salviogoncalves.com.br>";
 export const SITE_URL = "https://salviogoncalves.com.br";
+
+/** Prepara o ambiente do Blobs (necessário no modo de compatibilidade Lambda) */
+export function initBlobs(event) {
+  try {
+    connectLambda(event);
+  } catch {
+    /* fora do modo Lambda, o contexto já é injetado automaticamente */
+  }
+}
 
 export function getSubscribersStore() {
   return getStore("newsletter");

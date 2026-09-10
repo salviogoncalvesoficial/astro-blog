@@ -1,0 +1,287 @@
+---
+// ============================================================
+// /admin — Dashboard da newsletter (Etapa 2)
+// Página invisível: fora do menu, do sitemap e bloqueada no robots.txt.
+// Acesso: salviogoncalves.com.br/admin/ + senha (variável ADMIN_PASSWORD)
+// ============================================================
+---
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Admin · Newsletter</title>
+    <style>
+      :root {
+        --marfim: #faf7f2;
+        --areia: #f1ebe2;
+        --bege: #e2dacd;
+        --texto: #2c2723;
+        --cinza: #6e655c;
+        --salvia: #4e6351;
+        --vermelho: #b3474d;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--areia);
+        font-family: Georgia, "Times New Roman", serif;
+        color: var(--texto);
+        min-height: 100vh;
+        padding: 32px 16px;
+      }
+      .wrap { max-width: 900px; margin: 0 auto; }
+      .card {
+        background: var(--marfim);
+        border: 1px solid var(--bege);
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 20px;
+      }
+      h1 { font-size: 22px; margin: 0 0 4px 0; color: var(--salvia); }
+      .sub { color: var(--cinza); font-size: 13px; margin: 0 0 20px 0; }
+      h2 { font-size: 15px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--salvia); margin: 0 0 14px 0; }
+      input, button {
+        font-family: inherit;
+        font-size: 14px;
+        border-radius: 999px;
+        padding: 10px 18px;
+        border: 1px solid var(--bege);
+        background: #fff;
+        color: var(--texto);
+      }
+      input { flex: 1; min-width: 0; }
+      input:focus { outline: none; border-color: var(--salvia); }
+      button {
+        background: var(--salvia);
+        color: var(--marfim);
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      button:hover { opacity: 0.9; }
+      button.secundario { background: transparent; color: var(--salvia); border: 1px solid var(--salvia); }
+      button.perigo { background: transparent; color: var(--vermelho); border: 1px solid var(--vermelho); padding: 6px 12px; font-size: 12px; }
+      .linha { display: flex; gap: 10px; align-items: center; }
+      .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+      .stat { background: var(--areia); border-radius: 12px; padding: 16px; text-align: center; }
+      .stat b { display: block; font-size: 26px; color: var(--salvia); }
+      .stat span { font-size: 12px; color: var(--cinza); }
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      th { text-align: left; color: var(--cinza); font-weight: 600; padding: 8px 6px; border-bottom: 1px solid var(--bege); }
+      td { padding: 8px 6px; border-bottom: 1px solid var(--areia); }
+      .tag { font-size: 11px; padding: 2px 10px; border-radius: 999px; }
+      .tag.ativo { background: #e5efe6; color: var(--salvia); }
+      .tag.cancelado { background: #f3e3e4; color: var(--vermelho); }
+      .msg { margin-top: 12px; font-size: 13px; padding: 10px 14px; border-radius: 10px; display: none; }
+      .msg.ok { display: block; background: #e5efe6; color: var(--salvia); }
+      .msg.err { display: block; background: #f3e3e4; color: var(--vermelho); }
+      .acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+      .busca { margin-bottom: 12px; }
+      .escondido { display: none; }
+      .data { color: var(--cinza); font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <!-- ===== Login ===== -->
+      <div class="card" id="tela-login">
+        <h1>Admin · Newsletter</h1>
+        <p class="sub">Área privada de Salvio Gonçalves</p>
+        <form class="linha" id="form-login">
+          <input type="password" id="senha" placeholder="Senha do admin" autocomplete="current-password" />
+          <button type="submit">Entrar</button>
+        </form>
+        <p class="msg" id="msg-login"></p>
+      </div>
+
+      <!-- ===== Dashboard ===== -->
+      <div id="dashboard" class="escondido">
+        <div class="card">
+          <h1>Newsletter · painel</h1>
+          <p class="sub">salviogoncalves.com.br — sistema próprio (Netlify + Resend)</p>
+          <div class="stats">
+            <div class="stat"><b id="st-ativos">–</b><span>ativos</span></div>
+            <div class="stat"><b id="st-novos">–</b><span>novos (7 dias)</span></div>
+            <div class="stat"><b id="st-cancelados">–</b><span>cancelados</span></div>
+            <div class="stat"><b id="st-total">–</b><span>total</span></div>
+          </div>
+          <div class="acoes">
+            <button class="secundario" id="btn-enviar">Enviar newsletter agora</button>
+            <button class="secundario" id="btn-csv">Exportar lista (CSV)</button>
+            <button class="perigo" id="btn-sair">Sair</button>
+          </div>
+          <p class="msg" id="msg-painel"></p>
+        </div>
+
+        <div class="card">
+          <h2>Inscritos</h2>
+          <div class="linha busca">
+            <input type="text" id="busca" placeholder="Buscar e-mail..." />
+            <button class="secundario" id="btn-add-toggle">+ Adicionar</button>
+          </div>
+          <div class="linha escondido" id="linha-add" style="margin-bottom: 12px;">
+            <input type="email" id="novo-email" placeholder="novo@email.com" />
+            <button id="btn-add">Adicionar</button>
+          </div>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr><th>E-mail</th><th>Status</th><th>Inscrito em</th><th></th></tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Últimos envios</h2>
+          <div style="overflow-x: auto;">
+            <table>
+              <thead>
+                <tr><th>Data</th><th>Para</th><th>Assunto</th><th>Status</th></tr>
+              </thead>
+              <tbody id="tbody-emails"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API = "/.netlify/functions/admin";
+      let TOKEN = sessionStorage.getItem("nl-admin-token") || "";
+      let SUBS = [];
+
+      const $ = (id) => document.getElementById(id);
+
+      function msg(id, texto, tipo) {
+        const el = $(id);
+        el.textContent = texto;
+        el.className = "msg " + (tipo || "ok");
+        setTimeout(() => { el.className = "msg"; }, 5000);
+      }
+
+      async function api(body) {
+        const res = await fetch(API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...body, token: TOKEN }),
+        });
+        return res.json();
+      }
+
+      function renderTabela() {
+        const filtro = $("busca").value.toLowerCase().trim();
+        const tbody = $("tbody");
+        tbody.innerHTML = "";
+        SUBS.filter((s) => s.email.includes(filtro)).forEach((s) => {
+          const tr = document.createElement("tr");
+          const data = s.subscribedAt ? new Date(s.subscribedAt).toLocaleDateString("pt-BR") : "—";
+          tr.innerHTML = `
+            <td>${s.email}</td>
+            <td><span class="tag ${s.status === "active" ? "ativo" : "cancelado"}">${s.status === "active" ? "ativo" : "cancelado"}</span></td>
+            <td class="data">${data}</td>
+            <td><button class="perigo" data-email="${s.email}">remover</button></td>`;
+          tbody.appendChild(tr);
+        });
+        tbody.querySelectorAll("button.perigo").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            if (!confirm(`Remover ${btn.dataset.email} da lista?`)) return;
+            const r = await api({ action: "delete", email: btn.dataset.email });
+            if (r.ok) { msg("msg-painel", "Removido."); carregar(); }
+          });
+        });
+      }
+
+      function renderEmails(emails) {
+        const tbody = $("tbody-emails");
+        tbody.innerHTML = "";
+        (emails || []).forEach((e) => {
+          const tr = document.createElement("tr");
+          const data = e.created_at ? new Date(e.created_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—";
+          const cor = e.last_event === "delivered" || e.last_event === "opened" ? "ativo" : "cancelado";
+          tr.innerHTML = `
+            <td class="data">${data}</td>
+            <td>${e.to || "—"}</td>
+            <td>${e.subject || "—"}</td>
+            <td><span class="tag ${cor}">${e.last_event || "—"}</span></td>`;
+          tbody.appendChild(tr);
+        });
+      }
+
+      async function carregar() {
+        const r = await api({ action: "list" });
+        if (!r.ok) { sair(); return; }
+        SUBS = r.subs;
+        $("st-ativos").textContent = r.stats.active;
+        $("st-novos").textContent = r.stats.newThisWeek;
+        $("st-cancelados").textContent = r.stats.unsubscribed;
+        $("st-total").textContent = r.stats.total;
+        renderTabela();
+        const re = await api({ action: "emails" });
+        if (re.ok) renderEmails(re.emails);
+      }
+
+      function entrar(token) {
+        TOKEN = token;
+        sessionStorage.setItem("nl-admin-token", token);
+        $("tela-login").classList.add("escondido");
+        $("dashboard").classList.remove("escondido");
+        carregar();
+      }
+
+      function sair() {
+        TOKEN = "";
+        sessionStorage.removeItem("nl-admin-token");
+        $("dashboard").classList.add("escondido");
+        $("tela-login").classList.remove("escondido");
+      }
+
+      // ===== eventos =====
+      $("form-login").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const res = await fetch(API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "login", password: $("senha").value }),
+        });
+        const r = await res.json();
+        if (r.ok) entrar(r.token);
+        else msg("msg-login", r.error || "Erro", "err");
+        $("senha").value = "";
+      });
+
+      $("busca").addEventListener("input", renderTabela);
+
+      $("btn-add-toggle").addEventListener("click", () => $("linha-add").classList.toggle("escondido"));
+
+      $("btn-add").addEventListener("click", async () => {
+        const email = $("novo-email").value;
+        const r = await api({ action: "add", email });
+        if (r.ok) { $("novo-email").value = ""; msg("msg-painel", "Adicionado à lista."); carregar(); }
+        else msg("msg-painel", r.error || "Erro", "err");
+      });
+
+      $("btn-enviar").addEventListener("click", async () => {
+        if (!confirm("Enviar a newsletter agora para todos os ativos?")) return;
+        $("btn-enviar").disabled = true;
+        $("btn-enviar").textContent = "Enviando...";
+        const r = await api({ action: "send" });
+        $("btn-enviar").disabled = false;
+        $("btn-enviar").textContent = "Enviar newsletter agora";
+        msg("msg-painel", r.message || r.error || "Concluído", r.ok && r.sent > 0 ? "ok" : r.ok ? "ok" : "err");
+      });
+
+      $("btn-csv").addEventListener("click", () => {
+        window.open(`${API}?token=${encodeURIComponent(TOKEN)}&export=1`, "_blank");
+      });
+
+      $("btn-sair").addEventListener("click", sair);
+
+      // sessão persiste na aba atual
+      if (TOKEN) entrar(TOKEN);
+    </script>
+  </body>
+</html>

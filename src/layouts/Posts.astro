@@ -85,7 +85,8 @@ const temas = getUniqueTags(allPosts);
     .temas-sidebar {
       @apply self-start;
       position: sticky;
-      top: 6rem;
+      /* abaixo do header fixo (que tem ~8rem de altura) + respiro */
+      top: 10rem;
     }
   }
   /* ===== Bloco de Temas ===== */
@@ -93,10 +94,10 @@ const temas = getUniqueTags(allPosts);
     @apply rounded-2xl border border-skin-line bg-skin-card p-5;
   }
   .temas-title {
-    @apply mb-3 text-sm font-semibold uppercase tracking-wide text-skin-accent;
+    @apply mb-3 text-center text-sm font-semibold uppercase tracking-wide text-skin-accent;
   }
   .temas-list {
-    @apply flex flex-wrap gap-2;
+    @apply flex flex-wrap justify-center gap-2;
   }
   .temas-list li {
     @apply m-0;

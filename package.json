@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.4.1",
-    "@astrojs/rss": "^4.0.2",
     "@netlify/blobs": "^7.3.0",
     "@resvg/resvg-js": "^2.6.0",
     "astro": "^4.2.1",
@@ -27,7 +26,8 @@
     "remark-toc": "^9.0.0",
     "satori": "^0.10.11",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@astrojs/react": "^3.0.9",
@@ -44,7 +44,6 @@
     "eslint": "^8.56.0",
     "eslint-plugin-astro": "^0.31.3",
     "husky": "^8.0.3",
-    "lint-staged": "^15.2.0",
     "prettier": "^3.2.4",
     "prettier-plugin-astro": "^0.13.0",
     "prettier-plugin-tailwindcss": "^0.5.11",

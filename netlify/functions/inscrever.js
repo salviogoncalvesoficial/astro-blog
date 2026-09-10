@@ -25,23 +25,28 @@ export async function handler(event) {
 
   // E-mail de boas-vindas (não bloqueia a inscrição se falhar)
   if (result.ok && !result.already) {
-    await sendEmail({
-      to: email,
-      subject: "Bem-vindo ao espaço de reflexão de Salvio Gonçalves",
-      html: emailTemplate({
-        title: "Que bom que você chegou",
-        bodyHtml: `
-          <p>Olá,</p>
-          <p>Recebi sua inscrição na newsletter do blog <strong>salviogoncalves.com.br</strong> — um espaço para pensar, sentir e se cuidar.</p>
-          <p>De agora em diante, sempre que eu publicar um texto novo sobre ansiedade, autoconhecimento e saúde emocional, você recebe direto no seu e-mail.</p>
-          <p style="text-align:center;margin:24px 0;">
-            <a href="${SITE_URL}" style="display:inline-block;background:#4e6351;color:#faf7f2;padding:12px 28px;border-radius:9999px;text-decoration:none;font-size:14px;">Conheça o blog</a>
-          </p>
-          <p>Com acolhimento,<br/><strong>Salvio Gonçalves</strong></p>
-        `,
-        footerNote: "Você recebeu este e-mail porque se inscreveu na newsletter do blog.",
-      }),
-    });
+    try {
+      const ok = await sendEmail({
+        to: email,
+        subject: "Bem-vindo ao espaço de reflexão de Salvio Gonçalves",
+        html: emailTemplate({
+          title: "Que bom que você chegou",
+          bodyHtml: `
+            <p>Olá,</p>
+            <p>Recebi sua inscrição na newsletter do blog <strong>salviogoncalves.com.br</strong> — um espaço para pensar, sentir e se cuidar.</p>
+            <p>De agora em diante, sempre que eu publicar um texto novo sobre ansiedade, autoconhecimento e saúde emocional, você recebe direto no seu e-mail.</p>
+            <p style="text-align:center;margin:24px 0;">
+              <a href="${SITE_URL}" style="display:inline-block;background:#4e6351;color:#faf7f2;padding:12px 28px;border-radius:9999px;text-decoration:none;font-size:14px;">Conheça o blog</a>
+            </p>
+            <p>Com acolhimento,<br/><strong>Salvio Gonçalves</strong></p>
+          `,
+          footerNote: "Você recebeu este e-mail porque se inscreveu na newsletter do blog.",
+        }),
+      });
+      console.log(`[newsletter] boas-vindas para ${email}: ${ok ? "enviado" : "FALHOU"}`);
+    } catch (err) {
+      console.error("[newsletter] erro no envio das boas-vindas:", err?.message);
+    }
   }
 
   return redirect("/?newsletter=ok");

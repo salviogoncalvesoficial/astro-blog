@@ -6,6 +6,7 @@ title: Teste coringa 1
 featured: false
 draft: false
 tags:
+  - coringa
 description: teste
 ---
 teste

@@ -3,6 +3,9 @@ import { subscribe, sendEmail, emailTemplate, SITE_URL, initBlobs } from "./lib/
 /**
  * POST /inscrever (via formulário do blog)
  * Body: email=...
+ * Suporta dois modos:
+ *  - AJAX (Accept: application/json) → responde JSON {status, email}
+ *  - Formulário clássico (sem JS)     → redireciona com ?newsletter=ok|erro
  */
 export async function handler(event) {
   initBlobs(event);
@@ -10,6 +13,7 @@ export async function handler(event) {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Método não permitido" };
   }
+  const wantsJson = (event.headers["accept"] || event.headers["Accept"] || "").includes("application/json");
   const params = new URLSearchParams(event.body || "");
   const rawEmail = params.get("email") || "";
   // Teclados mobile inserem espaços e caracteres invisíveis (copiar/colar) —
@@ -19,14 +23,20 @@ export async function handler(event) {
     .toLowerCase();
   const honeypot = params.get("website"); // campo anti-spam escondido
 
+  const json = (status) => ({
+    statusCode: 200,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status, email }),
+  });
+
   // Validação básica de e-mail
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     console.log("[newsletter] e-mail rejeitado na validação:", JSON.stringify(rawEmail));
-    // devolve o texto recebido para o usuário ver o que chegou
+    if (wantsJson) return json("erro");
     return redirect(`/?newsletter=erro&email=${encodeURIComponent(email || rawEmail.trim())}#newsletter`);
   }
   // Bots que preenchem o campo escondido são ignorados
-  if (honeypot) return redirect("/?newsletter=ok#newsletter");
+  if (honeypot) return wantsJson ? json("ok") : redirect("/?newsletter=ok#newsletter");
 
   const result = await subscribe(email);
 
@@ -57,7 +67,7 @@ export async function handler(event) {
     }
   }
 
-  return redirect("/?newsletter=ok#newsletter");
+  return wantsJson ? json("ok") : redirect("/?newsletter=ok#newsletter");
 }
 
 function redirect(to) {

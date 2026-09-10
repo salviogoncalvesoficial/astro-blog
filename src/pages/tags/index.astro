@@ -10,9 +10,9 @@ import { SITE } from "@config";
 const posts = await getCollection("blog");
 let tags = getUniqueTags(posts);
 ---
-<Layout title={`Tags | ${SITE.title}`}>
+<Layout title={`Temas | ${SITE.title}`}>
   <Header activeNav="tags" />
-  <Main pageTitle="Tags" pageDesc="Todas as tags usadas nos artigos.">
+  <Main pageTitle="Temas" pageDesc="Todos os temas dos meus artigos.">
     <ul>
       {tags.map(({ tag }) => <Tag {tag} size="lg" />)}
     </ul>

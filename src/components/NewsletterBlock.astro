@@ -1,12 +1,16 @@
 ---
 // ============================================================
-// BLOCO DE NEWSLETTER — aparece automaticamente quando ativado.
-// COMO ATIVAR: crie o formulário embutido no MailerLite
-// (Formulários → Incorporado → copiar código HTML) e cole o
-// código completo na constante abaixo, entre as crases.
-// Enquanto estiver vazia, o bloco não aparece em lugar nenhum.
+// BLOCO DE NEWSLETTER — ativo e conectado ao sistema próprio
+// (Netlify Function /inscrever → Blobs → Resend)
 // ============================================================
-const formEmbedHtml = ``;
+const formEmbedHtml = `
+<form method="POST" action="/.netlify/functions/inscrever" class="nl-form">
+  <input type="text" name="website" class="nl-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
+  <input type="email" name="email" required placeholder="Seu melhor e-mail" class="nl-input" />
+  <button type="submit" class="nl-btn">Inscrever</button>
+</form>
+<p class="nl-privacy">Sem spam. Você pode cancelar com 1 clique, a qualquer momento.</p>
+`;
 ---
 {
   formEmbedHtml && (
@@ -42,5 +46,20 @@ const formEmbedHtml = ``;
   }
   .newsletter-form {
     @apply mt-6;
+  }
+  .newsletter-form :global(.nl-form) {
+    @apply mx-auto flex max-w-md flex-col gap-3 sm:flex-row;
+  }
+  .newsletter-form :global(.nl-input) {
+    @apply w-full flex-1 rounded-full border border-skin-line bg-skin-fill px-5 py-3 text-sm text-skin-base outline-none focus:border-skin-accent;
+  }
+  .newsletter-form :global(.nl-btn) {
+    @apply rounded-full bg-skin-accent px-6 py-3 text-sm font-medium text-skin-inverted transition-opacity hover:opacity-90;
+  }
+  .newsletter-form :global(.nl-honeypot) {
+    @apply hidden;
+  }
+  .newsletter-form :global(.nl-privacy) {
+    @apply mt-3 text-xs opacity-60;
   }
 </style>

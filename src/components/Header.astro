@@ -95,13 +95,16 @@ const { activeNav, sticky = false } = Astro.props;
     <nav id="nav-menu" aria-label="Navegação principal">
       <ul id="menu-items" class="display-none sm:flex">
         <li>
+          <a href="/">Início</a>
+        </li>
+        <li>
           <a href="/posts/" class={activeNav === "posts" ? "active" : ""}>
             Artigos
           </a>
         </li>
         <li>
           <a href="/tags/" class={activeNav === "tags" ? "active" : ""}>
-            Tags
+            Temas
           </a>
         </li>
         <li>

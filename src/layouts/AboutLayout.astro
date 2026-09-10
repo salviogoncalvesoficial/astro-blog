@@ -16,10 +16,60 @@ const { frontmatter } = Astro.props;
   <Header activeNav="about" />
   <Breadcrumbs />
   <main id="main-content">
-    <section id="about" class="prose mb-28 max-w-3xl prose-img:border-0">
-      <h1 class="text-2xl tracking-wider sm:text-3xl">{frontmatter.title}</h1>
+    <h1 class="about-title">{frontmatter.title}</h1>
+    <!-- Hero: foto + texto de apresentação lado a lado -->
+    <section class="about-hero">
+      <div class="about-photo">
+        <img
+          src="/hero-salvio.png"
+          alt="Sálvio Gonçalves, terapeuta"
+          loading="eager"
+        />
+      </div>
+      <div class="about-intro">
+        <p class="about-greeting">Olá, sou <strong>Sálvio Gonçalves</strong>.</p>
+        <p>
+          Se você chegou até aqui, provavelmente está em busca de algo — e esse
+          algo costuma ser mais do que uma resposta. Pode ser um alívio. Um
+          recomeço. Ou, simplesmente, alguém que escute de verdade. É para
+          isso que este espaço existe.
+        </p>
+      </div>
+    </section>
+    <!-- Resto do texto, em largura normal de leitura -->
+    <section id="about" class="prose about-body prose-img:border-0">
       <slot />
     </section>
   </main>
   <Footer />
 </Layout>
+<style>
+  #main-content {
+    @apply mx-auto w-full max-w-5xl px-4 pb-12;
+  }
+  .about-title {
+    @apply text-2xl font-semibold tracking-wider text-skin-accent sm:text-3xl;
+  }
+  /* ===== Hero em duas colunas ===== */
+  .about-hero {
+    @apply mt-8 grid grid-cols-1 items-center gap-8;
+  }
+  @media (min-width: 640px) {
+    .about-hero {
+      grid-template-columns: 300px minmax(0, 1fr);
+    }
+  }
+  .about-photo img {
+    @apply w-full rounded-2xl border border-skin-line object-cover;
+  }
+  .about-intro {
+    @apply text-base leading-relaxed opacity-90 sm:text-lg;
+  }
+  .about-greeting {
+    @apply mb-3 text-lg font-semibold text-skin-accent sm:text-xl;
+  }
+  /* ===== Corpo do texto ===== */
+  .about-body {
+    @apply mt-12 max-w-none;
+  }
+</style>

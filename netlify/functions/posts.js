@@ -154,6 +154,19 @@ export async function handler(event) {
       await gh("PUT", `${IMG_DIR}/${name}`, payload);
       return json(200, { ok: true, path: `/${name}` });
     }
+    if (action === "images") {
+      const dir = await gh("GET", IMG_DIR + "?ref=" + BRANCH);
+      const images = dir.filter(x => /\.(png|jpe?g|webp|gif|svg|avif)$/i.test(x.name))
+        .map(x => ({ name: x.name, size: x.size, path: "/" + x.name }));
+      images.sort((a, b) => a.name.localeCompare(b.name));
+      return json(200, { ok: true, images });
+    }
+    if (action === "delete-img") {
+      if (!body.name || body.name.includes("/") || body.name.includes("..")) return json(400, { ok: false, error: "Imagem inválida" });
+      const cur = await gh("GET", `${IMG_DIR}/${body.name}?ref=${BRANCH}`);
+      await gh("DELETE", `${IMG_DIR}/${body.name}`, { message: `Remove imagem: ${body.name}`, sha: cur.sha, branch: BRANCH });
+      return json(200, { ok: true });
+    }
     return json(400, { ok: false, error: "Ação desconhecida" });
   } catch (e) {
     return json(502, { ok: false, error: e.message || "Falha na comunicação com o GitHub" });

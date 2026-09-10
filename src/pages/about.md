@@ -1,5 +1,6 @@
 ---
 layout: ../layouts/AboutLayout.astro
+title: Sobre
 ---
 ## Um espaço de acolhimento
 

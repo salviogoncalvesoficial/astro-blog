@@ -45,7 +45,7 @@ const temas = getUniqueTags(allPosts);
               <ul class="temas-list">
                 {temas.map(({ tag, tagName }) => (
                   <li>
-                    <a href={`/tags/${tag}/`} class="tema-chip">
+                    <a href={`/tags/${tag}/`} class="tema-link">
                       {tagName}
                     </a>
                   </li>
@@ -97,12 +97,21 @@ const temas = getUniqueTags(allPosts);
     @apply mb-3 text-center text-sm font-semibold uppercase tracking-wide text-skin-accent;
   }
   .temas-list {
-    @apply flex flex-wrap justify-center gap-2;
+    @apply flex flex-col gap-2;
   }
   .temas-list li {
-    @apply m-0;
+    @apply m-0 flex items-center gap-2;
   }
-  .tema-chip {
-    @apply inline-block rounded-full border border-skin-line bg-skin-fill px-3 py-1 text-sm text-skin-base transition-colors hover:border-skin-accent hover:text-skin-accent;
+  /* bolinha no verde-sálvia da identidade */
+  .temas-list li::before {
+    content: "";
+    flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: rgb(var(--color-accent));
+  }
+  .tema-link {
+    @apply text-sm text-skin-base transition-colors hover:text-skin-accent;
   }
 </style>

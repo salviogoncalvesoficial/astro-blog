@@ -1,178 +1,23 @@
 import crypto from "node:crypto";
 import { connectLambda } from "@netlify/blobs";
-
 const REPO = "salviogoncalvesoficial/salviogoncalvesblog";
 const BRANCH = "main";
 const DIR = "src/content/blog";
 const IMG_DIR = "public";
-
-function makeToken() {
-  const secret = process.env.ADMIN_PASSWORD || "";
-  return crypto.createHmac("sha256", secret).update("nl-admin-v1").digest("base64url");
-}
-function checkToken(token) {
-  if (!token) return false;
-  const expected = makeToken();
-  const a = Buffer.from(token), b = Buffer.from(expected);
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
-}
-function json(code, obj) {
-  return { statusCode: code, headers: { "Content-Type": "application/json" }, body: JSON.stringify(obj) };
-}
-function gh(method, path, body) {
-  return fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
-    method,
-    headers: {
-      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-      Accept: "application/vnd.github+json",
-      "Content-Type": "application/json",
-      "User-Agent": "admin-blog",
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  }).then(async r => {
-    const data = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(data.message || `GitHub ${r.status}`);
-    return data;
-  });
-}
-function slugify(t) {
-  return String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-").replace(/-+/g, "-").slice(0, 80);
-}
-function parseFrontmatter(raw) {
-  const m = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
-  if (!m) return { fm: {}, body: raw };
-  const fm = {}; let cur = null;
-  for (const line of m[1].split("\n")) {
-    const li = line.match(/^\s*-\s+(.*)$/);
-    if (li && cur) { (fm[cur] = Array.isArray(fm[cur]) ? fm[cur] : []).push(li[1].trim().replace(/^["']|["']$/g, "")); continue; }
-    const kv = line.match(/^([A-Za-z_]+):\s*(.*)$/);
-    if (kv) {
-      cur = kv[1]; const v = kv[2].trim();
-      if (v === "true") fm[cur] = true;
-      else if (v === "false") fm[cur] = false;
-      else if (v === "") fm[cur] = null;
-      else fm[cur] = v.replace(/^["']|["']$/g, "");
-    }
-  }
-  return { fm, body: m[2] || "" };
-}
-function buildFrontmatter(fm) {
-  let out = "---\n";
-  out += `author: ${fm.author}\n`;
-  out += `pubDatetime: ${fm.pubDatetime}\n`;
-  out += `modDatetime: ${fm.modDatetime}\n`;
-  out += `title: ${fm.title}\n`;
-  if (fm.ogImage) out += `ogImage: "${fm.ogImage}"\n`;
-  out += `featured: ${fm.featured}\n`;
-  out += `draft: ${fm.draft}\n`;
-  out += "tags:\n";
-  for (const t of fm.tags) out += `  - ${t}\n`;
-  out += `description: ${fm.description}\n`;
-  out += "---\n";
-  return out;
-}
-function isoDate(v) {
-  const d = v ? new Date(v) : new Date();
-  if (isNaN(d)) return new Date().toISOString();
-  return d.toISOString();
-}
-
-export async function handler(event) {
-  try { connectLambda(event); } catch {}
-  if (event.httpMethod !== "POST") return { statusCode: 405, body: "Método não permitido" };
-  let body;
-  try { body = JSON.parse(event.body || "{}"); } catch { return json(400, { ok: false, error: "JSON inválido" }); }
-  const { action, token } = body;
-  if (action === "login") {
-    if (!body.password || body.password !== process.env.ADMIN_PASSWORD) return json(401, { ok: false, error: "Senha incorreta" });
-    return json(200, { ok: true, token: makeToken() });
-  }
-  if (!checkToken(token)) return json(401, { ok: false, error: "Sessão expirada — entre novamente" });
-  if (!process.env.GITHUB_TOKEN) return json(500, { ok: false, error: "GITHUB_TOKEN não configurado na Netlify" });
-
-  try {
-    if (action === "list") {
-      const dir = await gh("GET", DIR + "?ref=" + BRANCH);
-      const posts = [];
-      for (const f of dir.filter(x => x.name.endsWith(".md"))) {
-        const file = await gh("GET", `${DIR}/${f.name}?ref=${BRANCH}`);
-        const raw = Buffer.from(file.content, "base64").toString("utf8");
-        const { fm } = parseFrontmatter(raw);
-        posts.push({
-          file: f.name, title: fm.title || f.name, draft: Boolean(fm.draft),
-          featured: Boolean(fm.featured), tags: Array.isArray(fm.tags) ? fm.tags : (fm.tags ? [fm.tags] : []),
-          pubDatetime: fm.pubDatetime || null, description: fm.description || "",
-          ogImage: fm.ogImage || null,
-        });
-      }
-      posts.sort((a, b) => String(b.pubDatetime).localeCompare(String(a.pubDatetime)));
-      return json(200, { ok: true, posts });
-    }
-    if (action === "get") {
-      const file = await gh("GET", `${DIR}/${body.file}?ref=${BRANCH}`);
-      const raw = Buffer.from(file.content, "base64").toString("utf8");
-      const { fm, body: md } = parseFrontmatter(raw);
-      return json(200, { ok: true, file: body.file, sha: file.sha, post: {
-        author: fm.author || "", title: fm.title || "", description: fm.description || "",
-        ogImage: fm.ogImage || "",
-        pubDatetime: fm.pubDatetime || "", featured: Boolean(fm.featured), draft: Boolean(fm.draft),
-        tags: Array.isArray(fm.tags) ? fm.tags : (fm.tags ? [fm.tags] : []), body: md,
-      }});
-    }
-    if (action === "save") {
-      const p = body.post || {};
-      if (!p.title || !p.body) return json(400, { ok: false, error: "Título e conteúdo são obrigatórios" });
-      const now = isoDate(p.pubDatetime);
-      const fm = {
-        author: p.author || "Sálvio Gonçalves",
-        pubDatetime: p.pubDatetime ? isoDate(p.pubDatetime) : now,
-        modDatetime: now,
-        title: p.title,
-        ogImage: p.ogImage || "",
-        featured: Boolean(p.featured), draft: Boolean(p.draft),
-        tags: (Array.isArray(p.tags) ? p.tags : String(p.tags || "").split(",")).map(t => t.trim()).filter(Boolean),
-        description: p.description || "",
-      };
-      const content = buildFrontmatter(fm) + p.body.replace(/^\n+/, "");
-      let file = body.file || null, sha;
-      if (file) { try { const cur = await gh("GET", `${DIR}/${file}?ref=${BRANCH}`); sha = cur.sha; } catch {} }
-      else file = `${fm.pubDatetime.slice(0, 10)}-${slugify(p.title)}.md`;
-      const payload = { message: `Post: ${p.title}`, content: Buffer.from(content, "utf8").toString("base64"), branch: BRANCH };
-      if (sha) payload.sha = sha;
-      await gh("PUT", `${DIR}/${file}`, payload);
-      return json(200, { ok: true, file });
-    }
-    if (action === "delete") {
-      if (!body.file) return json(400, { ok: false, error: "Arquivo não informado" });
-      const cur = await gh("GET", `${DIR}/${body.file}?ref=${BRANCH}`);
-      await gh("DELETE", `${DIR}/${body.file}`, { message: `Remove post: ${body.file}`, sha: cur.sha, branch: BRANCH });
-      return json(200, { ok: true });
-    }
-    if (action === "upload") {
-      if (!body.name || !body.data) return json(400, { ok: false, error: "Imagem não informada" });
-      const name = Date.now() + "-" + slugify(body.name.replace(/\.[^.]+$/, "")) + (body.name.match(/\.[^.]+$/)?.[0] || "");
-      const b64 = body.data.includes(",") ? body.data.split(",")[1] : body.data;
-      const payload = { message: `Imagem: ${name}`, content: b64, branch: BRANCH };
-      try { const cur = await gh("GET", `${IMG_DIR}/${name}?ref=${BRANCH}`); payload.sha = cur.sha; } catch {}
-      await gh("PUT", `${IMG_DIR}/${name}`, payload);
-      return json(200, { ok: true, path: `/${name}` });
-    }
-    if (action === "images") {
-      const dir = await gh("GET", IMG_DIR + "?ref=" + BRANCH);
-      const images = dir.filter(x => /\.(png|jpe?g|webp|gif|svg|avif)$/i.test(x.name))
-        .map(x => ({ name: x.name, size: x.size, path: "/" + x.name }));
-      images.sort((a, b) => a.name.localeCompare(b.name));
-      return json(200, { ok: true, images });
-    }
-    if (action === "delete-img") {
-      if (!body.name || body.name.includes("/") || body.name.includes("..")) return json(400, { ok: false, error: "Imagem inválida" });
-      const cur = await gh("GET", `${IMG_DIR}/${body.name}?ref=${BRANCH}`);
-      await gh("DELETE", `${IMG_DIR}/${body.name}`, { message: `Remove imagem: ${body.name}`, sha: cur.sha, branch: BRANCH });
-      return json(200, { ok: true });
-    }
-    return json(400, { ok: false, error: "Ação desconhecida" });
-  } catch (e) {
-    return json(502, { ok: false, error: e.message || "Falha na comunicação com o GitHub" });
-  }
-}
+function makeToken() { const secret = process.env.ADMIN_PASSWORD || ""; return crypto.createHmac("sha256", secret).update("nl-admin-v1").digest("base64url"); }
+function checkToken(token) { if (!token) return false; const expected = makeToken(); const a = Buffer.from(token), b = Buffer.from(expected); return a.length === b.length && crypto.timingSafeEqual(a, b); }
+function json(code, obj) { return { statusCode: code, headers: { "Content-Type": "application/json" }, body: JSON.stringify(obj) }; }
+function gh(method, path, body) { return fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, { method, headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN}`, Accept: "application/vnd.github+json", "Content-Type": "application/json", "User-Agent": "admin-blog" }, body: body ? JSON.stringify(body) : undefined }).then(async r => { const data = await r.json().catch(() => ({})); if (!r.ok) throw new Error(data.message || `GitHub ${r.status}`); return data; }); }
+function slugify(t) { return String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-").replace(/-+/g, "-").slice(0, 80); }
+function parseFrontmatter(raw) { const m = raw.match(/^---\n([\s\S]*?)\n---\n?[\s\S]*$/); if (!m) return { fm: {}, body: raw }; const fm = {}; let cur = null; for (const line of m[1].split("\n")) { const li = line.match(/^\s*-\s+(.*)$/); if (li && cur) { (fm[cur] = Array.isArray(fm[cur]) ? fm[cur] : []).push(li[1].trim().replace(/^["']|["']$/g, "")); continue; } const kv = line.match(/^([A-Za-z_]+):\s*(.*)$/); if (kv) { cur = kv[1]; const v = kv[2].trim(); if (v === "true") fm[cur] = true; else if (v === "false") fm[cur] = false; else if (v === "") fm[cur] = null; else fm[cur] = v.replace(/^["']|["']$/g, ""); } } return { fm, body: raw.match(/^---\n[\s\S]*?\n---\n?([\s\S]*)$/)?.[1] || "" }; }
+function buildFrontmatter(fm) { let out = "---\n"; out += `author: ${fm.author}\n`; out += `pubDatetime: ${fm.pubDatetime}\n`; out += `modDatetime: ${fm.modDatetime}\n`; out += `title: ${fm.title}\n`; if (fm.ogImage) out += `ogImage: "${fm.ogImage}"\n`; out += `featured: ${fm.featured}\n`; out += `draft: ${fm.draft}\n`; out += "tags:\n"; for (const t of fm.tags) out += `  - ${t}\n`; out += `description: ${fm.description}\n---\n`; return out; }
+function isoDate(v) { const d = v ? new Date(v) : new Date(); return isNaN(d) ? new Date().toISOString() : d.toISOString(); }
+export async function handler(event) { try { connectLambda(event); } catch {} if (event.httpMethod !== "POST") return { statusCode: 405, body: "Método não permitido" }; let body; try { body = JSON.parse(event.body || "{}"); } catch { return json(400, { ok: false, error: "JSON inválido" }); } const { action, token } = body; if (action === "login") { if (!body.password || body.password !== process.env.ADMIN_PASSWORD) return json(401, { ok: false, error: "Senha incorreta" }); return json(200, { ok: true, token: makeToken() }); } if (!checkToken(token)) return json(401, { ok: false, error: "Sessão expirada — entre novamente" }); if (!process.env.GITHUB_TOKEN) return json(500, { ok: false, error: "GITHUB_TOKEN não configurado na Netlify" }); try {
+if (action === "list") { const dir = await gh("GET", DIR + "?ref=" + BRANCH); const posts = []; for (const f of dir.filter(x => x.name.endsWith(".md") && !x.name.startsWith("."))) { const file = await gh("GET", `${DIR}/${f.name}?ref=${BRANCH}`); const raw = Buffer.from(file.content, "base64").toString("utf8"); const { fm } = parseFrontmatter(raw); posts.push({ file: f.name, title: fm.title || f.name, draft: Boolean(fm.draft), featured: Boolean(fm.featured), tags: Array.isArray(fm.tags) ? fm.tags : (fm.tags ? [fm.tags] : []), pubDatetime: fm.pubDatetime || null, description: fm.description || "", ogImage: fm.ogImage || null }); } posts.sort((a,b) => String(b.pubDatetime).localeCompare(String(a.pubDatetime))); return json(200,{ok:true,posts}); }
+if (action === "get") { const file = await gh("GET", `${DIR}/${body.file}?ref=${BRANCH}`); const raw = Buffer.from(file.content,"base64").toString("utf8"); const {fm,body:md}=parseFrontmatter(raw); return json(200,{ok:true,file:body.file,sha:file.sha,post:{author:fm.author||"",title:fm.title||"",description:fm.description||"",ogImage:fm.ogImage||"",pubDatetime:fm.pubDatetime||"",featured:Boolean(fm.featured),draft:Boolean(fm.draft),tags:Array.isArray(fm.tags)?fm.tags:(fm.tags?[fm.tags]:[]),body:md}}); }
+if (action === "save") { const p=body.post||{}; if(!p.title||!p.body)return json(400,{ok:false,error:"Título e conteúdo são obrigatórios"}); const now=isoDate(p.pubDatetime); const fm={author:p.author||"Sálvio Gonçalves",pubDatetime:p.pubDatetime?isoDate(p.pubDatetime):now,modDatetime:now,title:p.title,ogImage:p.ogImage||"",featured:Boolean(p.featured),draft:Boolean(p.draft),tags:(Array.isArray(p.tags)?p.tags:String(p.tags||"").split(",")).map(t=>t.trim()).filter(Boolean),description:p.description||""}; const content=buildFrontmatter(fm)+p.body.replace(/^\n+/,""); let file=body.file||null,sha; if(file){try{const cur=await gh("GET",`${DIR}/${file}?ref=${BRANCH}`);sha=cur.sha}catch{}} else file=`${fm.pubDatetime.slice(0,10)}-${slugify(p.title)}.md`; const payload={message:`Post: ${p.title}`,content:Buffer.from(content,"utf8").toString("base64"),branch:BRANCH}; if(sha)payload.sha=sha; await gh("PUT",`${DIR}/${file}`,payload); return json(200,{ok:true,file}); }
+if (action === "delete") { if(!body.file)return json(400,{ok:false,error:"Arquivo não informado"}); const cur=await gh("GET",`${DIR}/${body.file}?ref=${BRANCH}`); await gh("DELETE",`${DIR}/${body.file}`,{message:`Remove post: ${body.file}`,sha:cur.sha,branch:BRANCH}); return json(200,{ok:true}); }
+if (action === "upload") { if(!body.name||!body.data)return json(400,{ok:false,error:"Imagem não informada"}); const name=Date.now()+"-"+slugify(body.name.replace(/\.[^.]+$/,""))+(body.name.match(/\.[^.]+$/)?.[0]||""); const b64=body.data.includes(",")?body.data.split(",")[1]:body.data; const payload={message:`Imagem: ${name}`,content:b64,branch:BRANCH}; try{const cur=await gh("GET",`${IMG_DIR}/${name}?ref=${BRANCH}`);payload.sha=cur.sha}catch{} await gh("PUT",`${IMG_DIR}/${name}`,payload); return json(200,{ok:true,path:`/${name}`}); }
+if (action === "images") { const dir=await gh("GET",IMG_DIR+"?ref="+BRANCH); const images=dir.filter(x=>/\.(png|jpe?g|webp|gif|svg|avif)$/i.test(x.name)).map(x=>({name:x.name,size:x.size,path:"/"+x.name})); images.sort((a,b)=>a.name.localeCompare(b.name)); return json(200,{ok:true,images}); }
+if (action === "delete-img") { if(!body.name||body.name.includes("/")||body.name.includes(".."))return json(400,{ok:false,error:"Imagem inválida"}); const cur=await gh("GET",`${IMG_DIR}/${body.name}?ref=${BRANCH}`); await gh("DELETE",`${IMG_DIR}/${body.name}`,{message:`Remove imagem: ${body.name}`,sha:cur.sha,branch:BRANCH}); return json(200,{ok:true}); }
+return json(400,{ok:false,error:"Ação desconhecida"}); } catch(e) { return json(502,{ok:false,error:e.message||"Falha na comunicação com o GitHub"}); } }

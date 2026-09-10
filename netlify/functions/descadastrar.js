@@ -1,7 +1,9 @@
-import { unsubscribe, emailFromToken, emailTemplate, sendEmail, initBlobs } from "./lib/newsletter.js";
+import { unsubscribe, emailFromToken, emailTemplate, SITE_URL, initBlobs } from "./lib/newsletter.js";
 
 /**
- * GET /descadastrar?token=...  → confirma o descadastro e mostra a página
+ * GET/POST /descadastrar?token=...
+ * GET  → confirma e mostra a página estilizada
+ * POST → descadastro em 1 clique (Gmail, RFC 8058)
  */
 export async function handler(event) {
   initBlobs(event);
@@ -16,6 +18,11 @@ export async function handler(event) {
     ok = result.ok;
   }
 
+  // No POST (descadastro em 1 clique) a resposta não é exibida a ninguém
+  if (event.httpMethod === "POST") {
+    return { statusCode: 200, body: ok ? "ok" : "erro" };
+  }
+
   const html = emailTemplate({
     title: ok ? "Sua inscrição foi cancelada" : "Link inválido",
     bodyHtml: ok
@@ -23,7 +30,7 @@ export async function handler(event) {
         <p>Pronto — você não receberá mais e-mails desta newsletter.</p>
         <p>Se mudar de ideia, a porta continua aberta: é só se inscrever novamente no blog quando quiser voltar.</p>
         <p style="text-align:center;margin:24px 0;">
-          <a href="https://salviogoncalves.com.br" style="display:inline-block;background:#4e6351;color:#faf7f2;padding:12px 28px;border-radius:9999px;text-decoration:none;font-size:14px;">Voltar ao blog</a>
+          <a href="${SITE_URL}" style="display:inline-block;background:#4e6351;color:#faf7f2;padding:12px 28px;border-radius:9999px;text-decoration:none;font-size:14px;">Voltar ao blog</a>
         </p>
         <p>Com acolhimento,<br/><strong>Salvio Gonçalves</strong></p>
       `
@@ -32,7 +39,7 @@ export async function handler(event) {
         <p>Se você continua recebendo e-mails e quer sair da lista, me escreva respondendo qualquer e-mail recebido — eu faço o cancelamento manualmente.</p>
       `,
     footerNote: "Este é um e-mail automático — não é preciso responder.",
-  });
+  }).replaceAll("{{UNSUBSCRIBE_URL}}", SITE_URL);
 
   return {
     statusCode: 200,

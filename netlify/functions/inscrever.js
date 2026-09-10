@@ -1,7 +1,7 @@
 import { subscribe, sendEmail, emailTemplate, SITE_URL, initBlobs } from "./lib/newsletter.js";
 
 /**
- * POST /api/inscrever  (via redirect do formulário)
+ * POST /inscrever (via formulário do blog)
  * Body: email=...
  */
 export async function handler(event) {
@@ -11,19 +11,23 @@ export async function handler(event) {
     return { statusCode: 405, body: "Método não permitido" };
   }
   const params = new URLSearchParams(event.body || "");
-  const email = (params.get("email") || "").trim().toLowerCase();
+  const rawEmail = params.get("email") || "";
+  // Teclados de celular inserem espaços — e-mail não tem espaço: remove todos
+  const email = rawEmail.replace(/\s+/g, "").toLowerCase();
   const honeypot = params.get("website"); // campo anti-spam escondido
 
   // Validação básica de e-mail
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return redirect("/?newsletter=erro");
+    console.log("[newsletter] e-mail rejeitado na validação:", JSON.stringify(rawEmail));
+    return redirect("/?newsletter=erro#newsletter");
   }
   // Bots que preenchem o campo escondido são ignorados
-  if (honeypot) return redirect("/?newsletter=ok");
+  if (honeypot) return redirect("/?newsletter=ok#newsletter");
 
   const result = await subscribe(email);
 
-  // E-mail de boas-vindas (não bloqueia a inscrição se falhar)
+  // E-mail de boas-vindas (não bloqueia a inscrição se falhar;
+  // não reenvia para quem já é inscrito)
   if (result.ok && !result.already) {
     try {
       const ok = await sendEmail({
@@ -49,7 +53,7 @@ export async function handler(event) {
     }
   }
 
-  return redirect("/?newsletter=ok");
+  return redirect("/?newsletter=ok#newsletter");
 }
 
 function redirect(to) {

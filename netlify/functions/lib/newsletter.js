@@ -21,7 +21,7 @@ export function getSubscribersStore() {
   return getStore("newsletter");
 }
 
-/** Token simples para link de descadastro (não expõe o e-mail na URL) */
+/** Token para link de descadastro (não expõe o e-mail na URL) */
 export function makeToken(email) {
   return Buffer.from(email).toString("base64url");
 }
@@ -32,6 +32,11 @@ export function emailFromToken(token) {
   } catch {
     return null;
   }
+}
+
+/** URL de descadastro por destinatário */
+export function unsubscribeUrl(email) {
+  return `${SITE_URL}/.netlify/functions/descadastrar?token=${makeToken(email)}`;
 }
 
 /** Lista de e-mails ativos (para o envio semanal) */
@@ -74,8 +79,10 @@ export async function unsubscribe(email) {
   return { ok: true };
 }
 
-/** Envia e-mail via Resend */
+/** Envia e-mail via Resend — substitui o link de descadastro por destinatário */
 export async function sendEmail({ to, subject, html }) {
+  const unsub = unsubscribeUrl(to);
+  const finalHtml = html.replaceAll("{{UNSUBSCRIBE_URL}}", unsub);
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -86,13 +93,18 @@ export async function sendEmail({ to, subject, html }) {
       from: FROM_EMAIL,
       to: [to],
       subject,
-      html,
+      html: finalHtml,
+      headers: {
+        "List-Unsubscribe": `<${unsub}>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+      },
     }),
   });
   return res.ok;
 }
 
-/** Template base — identidade "Acolhimento Sóbrio" do blog */
+/** Template base — identidade "Acolhimento Sóbrio" do blog.
+ *  O marcador {{UNSUBSCRIBE_URL}} é substituído por destinatário no sendEmail. */
 export function emailTemplate({ title, bodyHtml, footerNote }) {
   return `<!doctype html>
 <html lang="pt-br">
@@ -114,7 +126,7 @@ export function emailTemplate({ title, bodyHtml, footerNote }) {
           <p style="margin:0;font-size:12px;color:#6e655c;text-align:center;">
             <a href="${SITE_URL}" style="color:#4e6351;">salviogoncalves.com.br</a>
             &nbsp;·&nbsp;
-            <a href="${SITE_URL}/descadastrar" style="color:#6e655c;">Cancelar inscrição</a>
+            <a href="{{UNSUBSCRIBE_URL}}" style="color:#6e655c;">Cancelar inscrição</a>
           </p>
         </td></tr>
       </table>

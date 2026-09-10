@@ -39,16 +39,24 @@ export function unsubscribeUrl(email) {
   return `${SITE_URL}/.netlify/functions/descadastrar?token=${makeToken(email)}`;
 }
 
-/** Lista de e-mails ativos (para o envio semanal) */
-export async function getActiveSubscribers() {
+/** Lista TODOS os inscritos (qualquer status) — para o dashboard */
+export async function getAllSubscribers() {
   const store = getSubscribersStore();
   const { blobs } = await store.list();
-  const active = [];
+  const all = [];
   for (const blob of blobs) {
     const data = await store.get(blob.key, { type: "json" });
-    if (data && data.status === "active") active.push(data);
+    if (data) all.push(data);
   }
-  return active;
+  // mais recentes primeiro
+  all.sort((a, b) => (b.subscribedAt ?? "").localeCompare(a.subscribedAt ?? ""));
+  return all;
+}
+
+/** Lista de e-mails ativos (para o envio semanal) */
+export async function getActiveSubscribers() {
+  const all = await getAllSubscribers();
+  return all.filter((s) => s.status === "active");
 }
 
 /** Inscreve ou reativa um e-mail. Retorna {ok, already, reactivated} */
@@ -66,6 +74,13 @@ export async function subscribe(email) {
     status: "active",
     subscribedAt: new Date().toISOString(),
   });
+  return { ok: true };
+}
+
+/** Remove um inscrito da lista (dashboard) */
+export async function removeSubscriber(email) {
+  const store = getSubscribersStore();
+  await store.delete(email.toLowerCase().trim());
   return { ok: true };
 }
 
@@ -101,6 +116,74 @@ export async function sendEmail({ to, subject, html }) {
     }),
   });
   return res.ok;
+}
+
+/**
+ * Monta e envia a newsletter semanal (posts dos últimos 7 dias via RSS).
+ * Usada pela função agendada e pelo botão "enviar agora" do dashboard.
+ */
+export async function sendWeeklyNewsletter() {
+  const rss = await fetch(`${SITE_URL}/rss.xml`).then((r) => r.text());
+
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const items = [];
+  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+  let match;
+  while ((match = itemRegex.exec(rss)) !== null) {
+    const block = match[1];
+    const title = (block.match(/<title>([\s\S]*?)<\/title>/) || [])[1] || "";
+    const link = (block.match(/<link>([\s\S]*?)<\/link>/) || [])[1] || "";
+    const pubDate = (block.match(/<pubDate>([\s\S]*?)<\/pubDate>/) || [])[1] || "";
+    const ts = pubDate ? new Date(pubDate).getTime() : 0;
+    if (ts >= weekAgo) items.push({ title: decodeXml(title), link });
+  }
+
+  if (items.length === 0) {
+    return { sent: 0, total: 0, posts: 0, message: "Nenhum post novo na última semana — nada a enviar." };
+  }
+
+  const listHtml = items
+    .map(
+      (item) => `
+      <div style="margin:0 0 20px 0;padding:16px;background:#f1ebe2;border-radius:12px;">
+        <a href="${item.link}" style="color:#2c2723;font-weight:600;text-decoration:none;font-size:16px;">${item.title}</a><br/>
+        <a href="${item.link}" style="color:#4e6351;font-size:13px;text-decoration:underline;">Ler o artigo →</a>
+      </div>`
+    )
+    .join("");
+
+  const plural = items.length > 1 ? "s" : "";
+  const html = emailTemplate({
+    title: `${items.length} novo${plural} artigo${plural} no blog`,
+    bodyHtml: `
+      <p>Olá,</p>
+      <p>Passando para compartilhar o que publiquei nesta semana:</p>
+      ${listHtml}
+      <p>Uma boa leitura — e até a próxima reflexão.</p>
+      <p>Com acolhimento,<br/><strong>Salvio Gonçalves</strong></p>
+    `,
+    footerNote: "Você recebe este e-mail porque se inscreveu na newsletter do blog.",
+  });
+
+  const subscribers = await getActiveSubscribers();
+  let sent = 0;
+  for (const sub of subscribers) {
+    if (sent >= 90) break; // margem de segurança no teto diário do plano grátis
+    const ok = await sendEmail({ to: sub.email, subject: `Novo${plural} artigo${plural} de Salvio Gonçalves`, html });
+    if (ok) sent++;
+  }
+
+  return { sent, total: subscribers.length, posts: items.length, message: `Enviado para ${sent} de ${subscribers.length} inscritos (${items.length} post${plural}).` };
+}
+
+function decodeXml(s) {
+  return s
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
 }
 
 /** Template base — identidade "Acolhimento Sóbrio" do blog.

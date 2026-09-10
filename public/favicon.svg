@@ -1,9 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
-  <title id="title">Símbolo Salvio Gonçalves</title>
-  <desc id="desc">Círculo aberto com ondas formando um S e um ponto terracota</desc>
-  <path d="M30 30 A36 36 0 0 1 70 30" fill="none" stroke="#4E6351" stroke-width="7" stroke-linecap="round"/>
-  <path d="M30 70 A36 36 0 0 0 70 70" fill="none" stroke="#4E6351" stroke-width="7" stroke-linecap="round"/>
-  <path d="M34 37 C48 25 67 32 66 43 C65 53 48 48 38 57 C28 66 45 77 64 64" fill="none" stroke="#8FA396" stroke-width="6" stroke-linecap="round"/>
-  <path d="M35 39 C48 29 63 35 62 43 C61 50 48 49 39 57 C30 65 45 72 61 64" fill="none" stroke="#B97A5A" stroke-width="3.5" stroke-linecap="round" opacity=".95"/>
-  <circle cx="50" cy="79" r="4" fill="#B97A5A"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Símbolo Salvio Gonçalves"><image href="/1789058902899-favicon.png" width="512" height="512" preserveAspectRatio="xMidYMid meet"/></svg>

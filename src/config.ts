@@ -10,14 +10,14 @@ export const SITE: Site = {
   scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
 };
 export const LOCALE = {
-  lang: "pt-br", // html lang code. Set this empty and default will be "en"
+  lang: "pt-br", // Set this empty and default will be "en"
   langTag: ["pt-BR"], // BCP 47 Language Tags. Set this empty [] to use the environment default
 } as const;
 export const LOGO_IMAGE = {
-  enable: false,
+  enable: true,
   svg: true,
   width: 216,
-  height: 46,
+  height: 52,
 };
 export const SOCIALS: SocialObjects = [
   {

@@ -7,14 +7,14 @@ const breadcrumbList = currentUrlPath.split("/").slice(1);
 // Dicionário de tradução dos segmentos da URL
 const breadcrumbLabels: Record<string, string> = {
   posts: "Artigos",
-  tags: "Tags",
+  tags: "Temas",
   about: "Sobre",
   search: "Buscar",
 };
 // Se for Início > Artigos > página, substitui por "Artigos (página N)"
 breadcrumbList[0] === "posts" &&
   breadcrumbList.splice(0, 2, `Artigos (página ${breadcrumbList[1] || 1})`);
-// Se for Início > Tags > [tag] > [página], substitui por "[tag] (página N)"
+// Se for Início > Temas > [tema] > [página], substitui por "[tema] (página N)"
 breadcrumbList[0] === "tags" &&
   !isNaN(Number(breadcrumbList[2])) &&
   breadcrumbList.splice(
@@ -39,7 +39,7 @@ breadcrumbList[0] === "tags" &&
               class={index > 0 ? "lowercase" : "capitalize"}
               aria-current="page"
             >
-              {/* deixa a última parte em minúsculas em Início > Tags > alguma-tag */}
+              {/* deixa a última parte em minúsculas em Início > Temas > algum-tema */}
               {breadcrumbLabels[breadcrumb] ?? decodeURIComponent(breadcrumb)}
             </span>
           </li>

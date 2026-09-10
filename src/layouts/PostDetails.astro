@@ -224,6 +224,10 @@ const highlightPosts = [...related, ...featured, ...recent].slice(0, 3);
   .toc li.toc-sub a {
     @apply pl-4 text-xs opacity-80;
   }
+  /* ===== Artigo ocupa a coluna inteira (o tema limita .prose a 65ch) ===== */
+  .post-main :global(article.prose) {
+    max-width: 100%;
+  }
   /* ===== Padronização: mídia na largura da coluna ===== */
   .post-main :global(.video-wrap) {
     position: relative;

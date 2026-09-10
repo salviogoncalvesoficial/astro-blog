@@ -7,6 +7,7 @@ import LinkButton from "@components/LinkButton.astro";
 import Hr from "@components/Hr.astro";
 import Card from "@components/Card";
 import Socials from "@components/Socials.astro";
+import NewsletterBlock from "@components/NewsletterBlock.astro";
 import getSortedPosts from "@utils/getSortedPosts";
 import { getFirstImage } from "@utils/getFirstImage";
 import { SOCIALS } from "@config";
@@ -119,6 +120,7 @@ const socialCount = SOCIALS.filter(social => social.active).length;
         </svg>
       </LinkButton>
     </div>
+    <NewsletterBlock />
   </main>
   <Footer />
 </Layout>

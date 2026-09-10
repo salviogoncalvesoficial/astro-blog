@@ -33,9 +33,8 @@ const ogUrl = new URL(
   ogImageUrl ?? `/posts/${slugifyStr(title)}.png`,
   Astro.url.origin
 ).href;
-// ---- Capa automática: usa ogImage do frontmatter OU a primeira imagem do corpo ----
-const coverImage = ogImageUrl ?? getFirstImage(post.body);
-const coverFromBody = !!coverImage && !ogImageUrl;
+// ---- Capa dedicada: vem exclusivamente do campo ogImage do frontmatter ----
+const coverImage = ogImageUrl;
 const layoutProps = {
   title: `${title} | ${SITE.title}`,
   author,
@@ -123,11 +122,7 @@ const highlightPosts = [...related, ...featured, ...recent].slice(0, 3);
           </details>
         )
       }
-      <article
-        id="article"
-        role="article"
-        class:list={["prose mt-8", { "hide-first-img": coverFromBody }]}
-      >
+      <article id="article" role="article" class="prose mt-8">
         <Content />
       </article>
       <ul class="my-8 flex flex-wrap gap-2">
@@ -199,14 +194,10 @@ const highlightPosts = [...related, ...featured, ...recent].slice(0, 3);
   .post-title {
     @apply text-2xl font-semibold text-skin-accent sm:text-3xl;
   }
-  /* ===== Capa automática ===== */
+  /* ===== Capa dedicada — proporção banner 770 x 330 ===== */
   .post-cover {
     @apply mb-6 w-full rounded-2xl border border-skin-line object-cover;
-    aspect-ratio: 16 / 9;
-  }
-  /* :global é obrigatório — a imagem vem do markdown, fora do escopo do componente */
-  .hide-first-img :global(img:first-of-type) {
-    display: none;
+    aspect-ratio: 770 / 330;
   }
   /* ===== Sumário (TOC) ===== */
   .toc-mobile {
@@ -265,7 +256,7 @@ const highlightPosts = [...related, ...featured, ...recent].slice(0, 3);
     @apply overflow-hidden rounded-2xl border border-skin-line bg-skin-card transition-shadow hover:shadow-md;
   }
   .related-thumb {
-    @apply aspect-[16/9] w-full overflow-hidden bg-skin-card;
+    @apply aspect-[770/330] w-full overflow-hidden bg-skin-card;
   }
   .related-thumb img {
     @apply h-full w-full object-cover;

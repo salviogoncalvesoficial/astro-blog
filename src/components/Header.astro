@@ -4,10 +4,11 @@ import Hr from "./Hr.astro";
 import LinkButton from "./LinkButton.astro";
 export interface Props {
   activeNav?: "posts" | "tags" | "about" | "search";
+  sticky?: boolean;
 }
-const { activeNav } = Astro.props;
+const { activeNav, sticky = false } = Astro.props;
 ---
-<header>
+<header class:list={{ "header-sticky": sticky }}>
   <a id="skip-to-content" href="#main-content">Pular para o conteúdo</a>
   <div class="header-inner">
     <!-- Linha superior: hambúrguer (mobile) | logo central absoluto | ícones à direita -->
@@ -114,6 +115,9 @@ const { activeNav } = Astro.props;
   <Hr />
 </header>
 <style>
+  .header-sticky {
+    @apply sticky top-0 z-40 bg-skin-fill;
+  }
   #skip-to-content {
     @apply absolute -top-full left-16 z-50 bg-skin-accent px-3 py-2 text-skin-inverted transition-all focus:top-4;
   }

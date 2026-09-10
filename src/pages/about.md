@@ -2,9 +2,6 @@
 layout: ../layouts/AboutLayout.astro
 title: Sobre
 ---
-Olá, sou Salvio Gonçalves.
-Se você chegou até aqui, provavelmente está em busca de algo — e esse algo costuma ser mais do que uma resposta. Pode ser um alívio. Um recomeço. Ou, simplesmente, alguém que escute de verdade. É para isso que este espaço existe.
-
 ## Um espaço de acolhimento
 Acredito que toda transformação começa quando nos sentimos seguros o suficiente para olhar para dentro. Por isso, meu trabalho parte de um princípio simples: você não precisa se consertar — você precisa se compreender.
 Ao longo da minha jornada como terapeuta, me especializei em uma abordagem que une o que a ciência moderna tem de mais profundo com o cuidado que toda pessoa merece. A Terapia Hertz, formação que realizei com a Elainne Ourives, me deu ferramentas para trabalhar a mente em camadas que vão além do pensamento consciente — onde estão as crenças, os padrões e as emoções que dirigem nossa vida muitas vezes sem que percebamos.

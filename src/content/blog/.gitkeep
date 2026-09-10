@@ -1,0 +1,3 @@
+# Mantém a pasta da coleção de posts no repositório.
+# O Astro precisa que src/content/blog/ exista para o build funcionar,
+# mesmo quando não há nenhum post publicado.

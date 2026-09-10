@@ -6,14 +6,14 @@
 const formEmbedHtml = `
 <form method="POST" action="/.netlify/functions/inscrever" class="nl-form" id="nl-form">
   <input type="text" name="website" class="nl-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
-  <input type="email" name="email" required placeholder="Seu melhor e-mail" class="nl-input" />
+  <input type="email" name="email" required placeholder="Seu melhor e-mail" class="nl-input" autocapitalize="off" autocorrect="off" spellcheck="false" />
   <button type="submit" class="nl-btn">Inscrever</button>
 </form>
 <div class="nl-success display-none" id="nl-success">
   <p class="nl-success-title">Inscrição confirmada! 🎉</p>
   <p class="nl-success-text">A partir de agora, os novos artigos chegam direto no seu e-mail. Confira sua caixa de entrada — acolhimento em breve!</p>
 </div>
-<p class="nl-error display-none" id="nl-error">Ops — este e-mail não parece válido. Tente novamente, por favor.</p>
+<p class="nl-error display-none" id="nl-error"><span id="nl-error-msg">Ops — este e-mail não parece válido. Tente novamente, por favor.</span></p>
 <p class="nl-privacy" id="nl-privacy">Sem spam. Você pode cancelar com 1 clique, a qualquer momento.</p>
 `;
 ---
@@ -81,11 +81,12 @@ const formEmbedHtml = `
   }
 </style>
 <script>
-  // Mostra a confirmação quando a função redireciona de volta com ?newsletter=ok|erro
+  // Mostra a confirmação/erro quando a função redireciona de volta
   function newsletterFeedback() {
     const params = new URLSearchParams(window.location.search);
     const status = params.get("newsletter");
     if (!status) return;
+    const section = document.getElementById("newsletter");
     const form = document.getElementById("nl-form");
     const success = document.getElementById("nl-success");
     const error = document.getElementById("nl-error");
@@ -95,8 +96,15 @@ const formEmbedHtml = `
       privacy?.classList.add("display-none");
       success.classList.remove("display-none");
     } else if (status === "erro" && error) {
+      const received = params.get("email");
+      const msg = document.getElementById("nl-error-msg");
+      if (msg && received) {
+        msg.textContent = `Recebemos “${received}”, que não parece um e-mail válido. Confira se foi digitado corretamente (ex.: nome@gmail.com) e tente de novo.`;
+      }
       error.classList.remove("display-none");
     }
+    // leva o usuário direto ao bloco (sem depender da âncora do redirect)
+    section?.scrollIntoView({ behavior: "smooth", block: "start" });
     // limpa a URL para o recarregar não repetir a mensagem
     window.history.replaceState({}, "", window.location.pathname + "#newsletter");
   }

@@ -12,14 +12,18 @@ export async function handler(event) {
   }
   const params = new URLSearchParams(event.body || "");
   const rawEmail = params.get("email") || "";
-  // Teclados de celular inserem espaços — e-mail não tem espaço: remove todos
-  const email = rawEmail.replace(/\s+/g, "").toLowerCase();
+  // Teclados mobile inserem espaços e caracteres invisíveis (copiar/colar) —
+  // remove tudo que não pertence a um e-mail antes de validar
+  const email = rawEmail
+    .replace(/[\s\u200B-\u200D\uFEFF]+/g, "")
+    .toLowerCase();
   const honeypot = params.get("website"); // campo anti-spam escondido
 
   // Validação básica de e-mail
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     console.log("[newsletter] e-mail rejeitado na validação:", JSON.stringify(rawEmail));
-    return redirect("/?newsletter=erro#newsletter");
+    // devolve o texto recebido para o usuário ver o que chegou
+    return redirect(`/?newsletter=erro&email=${encodeURIComponent(email || rawEmail.trim())}#newsletter`);
   }
   // Bots que preenchem o campo escondido são ignorados
   if (honeypot) return redirect("/?newsletter=ok#newsletter");

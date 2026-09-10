@@ -34,7 +34,7 @@ export default function Card({
             src={coverImage}
             alt={title}
             loading="lazy"
-            className="aspect-[16/9] w-full object-cover"
+            className="aspect-[770/330] w-full object-cover"
           />
         </a>
       )}

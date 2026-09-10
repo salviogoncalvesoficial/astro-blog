@@ -13,8 +13,8 @@ body{padding:12px 8px}.card{padding:16px;border-radius:14px}
 #refresh,.desk-search #refresh{display:none!important}.list-head>.row{display:flex;flex-wrap:nowrap;gap:5px;align-items:center}.menu-btn,.search-btn{display:inline-flex;width:40px;height:40px;padding:0;align-items:center;justify-content:center;flex:0 0 40px}
 #list-card{position:relative}.list-head{flex-wrap:wrap}.desk-search{display:flex;flex:1 1 100%;justify-content:flex-end}.desk-search #search{display:none}.desk-search .menu-btn{width:40px;height:40px;flex:0 0 40px}#desk-filters{display:none!important}
 #toolbar{display:block}.toolbar{gap:7px}
-/* busca vira caixa flutuante */
-#search{display:none;position:absolute;left:8px;right:8px;top:70px;z-index:40;padding:13px 16px;border-radius:14px;box-shadow:0 10px 30px rgba(44,39,35,.18);min-width:0}
+/* busca vira caixa flutuante (escondida até tocar na lupa) */
+#search,#search-m{display:none;position:absolute;left:8px;right:8px;top:70px;z-index:40;padding:13px 16px;border-radius:14px;box-shadow:0 10px 30px rgba(44,39,35,.18);min-width:0}
 #toolbar.search-open #search-m{display:block}
 /* filtros viram menu flutuante vertical, alinhado à direita */
 #filters{display:none;position:absolute;right:8px;top:70px;z-index:40;flex-direction:column;gap:7px;min-width:180px;flex-wrap:nowrap}

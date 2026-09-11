@@ -69,9 +69,9 @@ export async function handler(event) {
   }
   if (action === "delete") { await store.delete(id); return json(200, { ok: true }); }
   if (action === "bulk") {
-    // Operações em massa: ids[] + op (trash | archive | read | unread | delete permanente)
+    // Operações em massa: ids[] + op (trash | archive | inbox | read | unread | delete permanente)
     const ids = Array.isArray(body.ids) ? body.ids : [];
-    const op = ["trash", "archive", "read", "unread", "delete"].includes(body.op) ? body.op : null;
+    const op = ["trash", "archive", "inbox", "read", "unread", "delete"].includes(body.op) ? body.op : null;
     if (!op || !ids.length) return json(400, { ok: false, error: "Operação ou lista de e-mails inválida" });
     let done = 0;
     for (const mid of ids.slice(0, 200)) {

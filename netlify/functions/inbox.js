@@ -89,7 +89,7 @@ export async function handler(event) {
   }
   if (action === "reprocess") {
     // Corrige e-mails antigos: busca o conteúdo completo na API do Resend
-    // (traz o remetente com nome de exibição e o HTML original) e regrava o registro.
+    // (traz o header From com nome de exibição e o HTML original) e regrava o registro.
     if (!process.env.RESEND_API_KEY) return json(500, { ok: false, error: "RESEND_API_KEY não configurada" });
     const msgs = await listMessages();
     let fixed = 0, failed = 0;
@@ -101,7 +101,7 @@ export async function handler(event) {
         const full = await res.json();
         await store.setJSON(m.id, {
           ...m,
-          from: full.from || m.from,
+          from: full.headers?.from || full.from || m.from,
           text: full.text ?? m.text ?? "",
           html: full.html ?? m.html ?? "",
         });

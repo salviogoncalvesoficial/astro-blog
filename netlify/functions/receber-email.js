@@ -16,9 +16,9 @@ export async function handler(event) {
           const full = await res.json();
           text = full.text ?? "";
           html = full.html ?? "";
-          // O conteúdo completo traz o remetente com nome de exibição ("Nome <email>");
-          // o webhook entrega só o endereço cru. Preferir o completo.
-          if (full.from) from = full.from;
+          // O nome de exibição ("Nome <email>") vem no header From; o campo
+          // from do topo e do webhook trazem só o endereço cru.
+          from = full.headers?.from || full.from || from;
         }
       } catch (err) { console.error("[inbox] erro ao buscar conteúdo:", err?.message); }
     }

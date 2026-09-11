@@ -1,6 +1,8 @@
 import crypto from "node:crypto";
 import { getStore, connectLambda } from "@netlify/blobs";
 
+const TRASH_DAYS = 30;
+
 function makeToken() {
   const secret = process.env.ADMIN_PASSWORD || "";
   return crypto.createHmac("sha256", secret).update("nl-admin-v1").digest("base64url");
@@ -41,7 +43,15 @@ export async function handler(event) {
 
   const store = getStore("inbox");
   if (action === "list") {
-    const msgs = await listMessages();
+    let msgs = await listMessages();
+    // Auto-expiração: e-mails na lixeira há mais de 30 dias são apagados de vez.
+    const cutoff = Date.now() - TRASH_DAYS * 24 * 60 * 60 * 1000;
+    for (const m of msgs) {
+      if (m.folder === "trash" && new Date(m.receivedAt || m.sentAt || 0).getTime() < cutoff) {
+        try { await store.delete(m.id); } catch {}
+      }
+    }
+    msgs = msgs.filter((m) => m.folder !== "trash" || new Date(m.receivedAt || m.sentAt || 0).getTime() >= cutoff);
     return json(200, { ok: true, msgs, unread: msgs.filter((m) => !m.read && m.folder === "inbox").length });
   }
   if (action === "read") {
@@ -58,6 +68,32 @@ export async function handler(event) {
     return json(200, { ok: true });
   }
   if (action === "delete") { await store.delete(id); return json(200, { ok: true }); }
+  if (action === "bulk") {
+    // Operações em massa: ids[] + op (trash | archive | read | unread | delete permanente)
+    const ids = Array.isArray(body.ids) ? body.ids : [];
+    const op = ["trash", "archive", "read", "unread", "delete"].includes(body.op) ? body.op : null;
+    if (!op || !ids.length) return json(400, { ok: false, error: "Operação ou lista de e-mails inválida" });
+    let done = 0;
+    for (const mid of ids.slice(0, 200)) {
+      try {
+        if (op === "delete") { await store.delete(mid); done++; continue; }
+        const msg = await store.get(mid, { type: "json" });
+        if (!msg) continue;
+        if (op === "read" || op === "unread") await store.setJSON(mid, { ...msg, read: op === "read" });
+        else await store.setJSON(mid, { ...msg, folder: op });
+        done++;
+      } catch (err) { console.error("[bulk] erro em", mid, err?.message); }
+    }
+    return json(200, { ok: true, done });
+  }
+  if (action === "empty-trash") {
+    const msgs = await listMessages();
+    let done = 0;
+    for (const m of msgs) {
+      if (m.folder === "trash") { try { await store.delete(m.id); done++; } catch {} }
+    }
+    return json(200, { ok: true, done });
+  }
   if (action === "reply") {
     if (!to || !text) return json(400, { ok: false, error: "Destinatário e texto são obrigatórios" });
     const res = await fetch("https://api.resend.com/emails", {
@@ -86,32 +122,6 @@ export async function handler(event) {
       sentAt: new Date().toISOString(),
     });
     return json(200, { ok: true });
-  }
-  if (action === "reprocess") {
-    // Corrige e-mails antigos: busca o conteúdo completo na API do Resend
-    // (traz o header From com nome de exibição e o HTML original) e regrava o registro.
-    if (!process.env.RESEND_API_KEY) return json(500, { ok: false, error: "RESEND_API_KEY não configurada" });
-    const msgs = await listMessages();
-    let fixed = 0, failed = 0;
-    for (const m of msgs) {
-      if (m.folder === "sent") continue;
-      try {
-        const res = await fetch(`https://api.resend.com/emails/receiving/${m.id}`, { headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` } });
-        if (!res.ok) { failed++; continue; }
-        const full = await res.json();
-        await store.setJSON(m.id, {
-          ...m,
-          from: full.headers?.from || full.from || m.from,
-          text: full.text ?? m.text ?? "",
-          html: full.html ?? m.html ?? "",
-        });
-        fixed++;
-      } catch (err) {
-        console.error("[reprocess] erro em", m.id, err?.message);
-        failed++;
-      }
-    }
-    return json(200, { ok: true, fixed, failed });
   }
   return json(400, { ok: false, error: "Ação desconhecida" });
 }

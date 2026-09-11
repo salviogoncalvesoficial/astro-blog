@@ -8,18 +8,25 @@ export async function handler(event) {
     const body = JSON.parse(event.body || "{}");
     const msg = body.data ?? body;
     const emailId = msg.email_id ?? msg.id;
-    let text = "", html = "";
+    let text = "", html = "", from = msg.from ?? "desconhecido";
     if (emailId && process.env.RESEND_API_KEY) {
       try {
         const res = await fetch(`https://api.resend.com/emails/receiving/${emailId}`, { headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` } });
-        if (res.ok) { const full = await res.json(); text = full.text ?? ""; html = full.html ?? ""; }
+        if (res.ok) {
+          const full = await res.json();
+          text = full.text ?? "";
+          html = full.html ?? "";
+          // O conteúdo completo traz o remetente com nome de exibição ("Nome <email>");
+          // o webhook entrega só o endereço cru. Preferir o completo.
+          if (full.from) from = full.from;
+        }
       } catch (err) { console.error("[inbox] erro ao buscar conteúdo:", err?.message); }
     }
     const store = getStore("inbox");
     const id = emailId || `mail-${Date.now()}`;
-    await store.setJSON(id, { id, from: msg.from ?? "desconhecido", to: Array.isArray(msg.to) ? msg.to.join(", ") : msg.to ?? "", subject: msg.subject || "(sem assunto)", text, html, receivedAt: body.created_at ?? new Date().toISOString(), read: false });
+    await store.setJSON(id, { id, from, to: Array.isArray(msg.to) ? msg.to.join(", ") : msg.to ?? "", subject: msg.subject || "(sem assunto)", text, html, receivedAt: body.created_at ?? new Date().toISOString(), read: false });
     try {
-      await sendPushNotification({ title: "Novo e-mail no Inbox", body: `${msg.from ?? "Novo contato"}: ${msg.subject || "(sem assunto)"}`, url: `/admin/?inbox=${encodeURIComponent(id)}` });
+      await sendPushNotification({ title: "Novo e-mail no Inbox", body: `${from ?? "Novo contato"}: ${msg.subject || "(sem assunto)"}`, url: `/admin/?inbox=${encodeURIComponent(id)}` });
     } catch (err) { console.error("[push] erro ao notificar:", err?.message); }
     return { statusCode: 200, body: "ok" };
   } catch (err) { console.error("[inbox] erro:", err?.message); return { statusCode: 200, body: "ok" }; }

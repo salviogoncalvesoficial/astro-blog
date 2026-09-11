@@ -1,10 +1,17 @@
 ---
-const { compact = false } = Astro.props;
+const { compact = false, margin = false } = Astro.props;
 ---
 {compact ? (
   <a class="contact-strip" href="/contato/agendamento/" aria-label="Seu próximo passo começa aqui — abrir agendamento">
     <span>Seu próximo passo começa aqui</span><strong>Vamos conversar <span aria-hidden="true">↗</span></strong>
   </a>
+) : margin ? (
+  <aside class="contact-cta-card contact-margin-card" data-contact-hero aria-labelledby="contact-margin-title">
+    <p class="contact-cta-kicker">Um convite para você</p>
+    <h2 id="contact-margin-title">Seu próximo passo começa aqui</h2>
+    <p>Se algo dentro de você pede mudança, podemos conversar sobre isso com calma e acolhimento.</p>
+    <a href="/contato/agendamento/">Escolher um horário <span aria-hidden="true">↗</span></a>
+  </aside>
 ) : (
   <section class="contact-cta-card" data-contact-hero aria-labelledby="contact-cta-title">
     <p class="contact-cta-kicker">Um convite para você</p>
@@ -20,9 +27,20 @@ const { compact = false } = Astro.props;
   .contact-cta-card p:not(.contact-cta-kicker){margin:.8rem 0 1.2rem;line-height:1.6;color:rgb(var(--color-base)/.8)}
   .contact-cta-card a{display:inline-flex;align-items:center;gap:.45rem;border-radius:999px;background:rgb(var(--color-accent));padding:.7rem 1rem;color:rgb(var(--color-inverted));font-size:.85rem;font-weight:600;transition:opacity .2s ease}
   .contact-cta-card a:hover{opacity:.88}
-  .contact-strip{position:fixed;top:var(--contact-strip-top,5.9rem);left:50%;z-index:35;display:flex;width:min(50rem,calc(100% - 2rem));transform:translate(-50%,-160%);align-items:center;justify-content:space-between;gap:1rem;border:1px solid rgb(var(--color-line));border-radius:999px;background:rgb(var(--color-card)/.96);padding:.65rem 1rem .65rem 1.2rem;box-shadow:0 10px 28px rgb(var(--color-base)/.14);backdrop-filter:blur(12px);color:rgb(var(--color-base));transition:transform .35s ease}
+  /* Cartão fixo na margem direita (desktop largo): comportamento "Temas" —
+     repousa abaixo do header e permanece visível até o fim da página */
+  .contact-margin-card{display:none}
+  @media(min-width:1536px){
+    .contact-margin-card{display:block;position:fixed;top:7.75rem;left:calc(50% + 33rem);width:clamp(11rem,calc(50vw - 34.5rem),15rem);z-index:30}
+    .contact-margin-card h2{font-size:1.2rem}
+    .contact-margin-card p:not(.contact-cta-kicker){font-size:.86rem;margin:.6rem 0 1rem}
+    .contact-margin-card a{padding:.6rem .85rem;font-size:.78rem}
+  }
+  .contact-strip{position:fixed;top:var(--contact-strip-top,8rem);left:50%;z-index:35;display:flex;width:min(50rem,calc(100% - 2rem));transform:translate(-50%,-160%);align-items:center;justify-content:space-between;gap:1rem;border:1px solid rgb(var(--color-line));border-radius:999px;background:rgb(var(--color-card)/.96);padding:.65rem 1rem .65rem 1.2rem;box-shadow:0 10px 28px rgb(var(--color-base)/.14);backdrop-filter:blur(12px);color:rgb(var(--color-base));transition:transform .35s ease}
   .contact-strip.is-visible{transform:translate(-50%,0)}
   .contact-strip strong{border-radius:999px;background:rgb(var(--color-accent));padding:.48rem .8rem;color:rgb(var(--color-inverted));font-size:.78rem;white-space:nowrap}
-  @media(max-width:640px){.contact-strip{top:4.9rem;width:calc(100% - 1rem);padding:.55rem .65rem .55rem .9rem}.contact-strip>span{font-size:.78rem;line-height:1.2}.contact-strip strong{padding:.55rem .7rem;font-size:.74rem}}
+  @media(max-width:640px){.contact-strip{top:5.6rem;width:calc(100% - 1rem);padding:.55rem .65rem .55rem .9rem}.contact-strip>span{font-size:.78rem;line-height:1.2}.contact-strip strong{padding:.55rem .7rem;font-size:.74rem}}
+  /* Em telas largas o cartão de margem assume: a faixa não é necessária */
+  @media(min-width:1536px){.contact-strip{display:none!important}}
   @media(prefers-reduced-motion:reduce){.contact-strip{transition:none}}
 </style>

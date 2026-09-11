@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { getStore } from "@netlify/blobs";
+import { getStore, connectLambda } from "@netlify/blobs";
 import webpush from "web-push";
 
 const json = (statusCode, body) => ({ statusCode, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -18,15 +18,26 @@ export async function sendPushNotification(payload) {
   return { sent };
 }
 export async function handler(event) {
+  try { connectLambda(event); } catch {}
   if (event.httpMethod !== "POST") return { statusCode: 405, body: "Método não permitido" };
   let body; try { body = JSON.parse(event.body || "{}"); } catch { return json(400, { ok: false, error: "JSON inválido" }); }
   const { action, token, subscription } = body;
   if (action === "public-key") return configured() ? json(200, { ok: true, publicKey: process.env.VAPID_PUBLIC_KEY }) : json(503, { ok: false, error: "Push ainda não configurado na Netlify" });
   if (!validToken(token)) return json(401, { ok: false, error: "Sessão expirada — entre novamente" });
   if (!configured()) return json(503, { ok: false, error: "Configure as chaves VAPID na Netlify" });
-  const s = store();
-  if (action === "subscribe") { if (!subscription?.endpoint) return json(400, { ok: false, error: "Inscrição inválida" }); const key = Buffer.from(subscription.endpoint).toString("base64url"); await s.setJSON(key, subscription); return json(200, { ok: true }); }
-  if (action === "unsubscribe") { if (subscription?.endpoint) await s.delete(Buffer.from(subscription.endpoint).toString("base64url")); return json(200, { ok: true }); }
-  if (action === "test") { const result = await sendPushNotification({ title: "Inbox do Salvio", body: "Notificação de teste funcionando!", url: "/admin/" }); return json(200, { ok: true, ...result }); }
-  return json(400, { ok: false, error: "Ação desconhecida" });
+  try {
+    const s = store();
+    if (action === "subscribe") {
+      if (!subscription?.endpoint) return json(400, { ok: false, error: "Inscrição inválida" });
+      const key = Buffer.from(subscription.endpoint).toString("base64url");
+      await s.setJSON(key, subscription);
+      return json(200, { ok: true });
+    }
+    if (action === "unsubscribe") { if (subscription?.endpoint) await s.delete(Buffer.from(subscription.endpoint).toString("base64url")); return json(200, { ok: true }); }
+    if (action === "test") { const result = await sendPushNotification({ title: "Inbox do Salvio", body: "Notificação de teste funcionando!", url: "/admin/" }); return json(200, { ok: true, ...result }); }
+    return json(400, { ok: false, error: "Ação desconhecida" });
+  } catch (err) {
+    console.error("[push] erro:", err?.message);
+    return json(502, { ok: false, error: "Erro interno do push: " + (err?.message || "desconhecido") });
+  }
 }

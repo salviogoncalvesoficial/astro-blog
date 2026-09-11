@@ -1,0 +1,28 @@
+---
+const { compact = false } = Astro.props;
+---
+{compact ? (
+  <a class="contact-strip" href="/contato/agendamento/" aria-label="Seu próximo passo começa aqui — abrir agendamento">
+    <span>Seu próximo passo começa aqui</span><strong>Vamos conversar <span aria-hidden="true">↗</span></strong>
+  </a>
+) : (
+  <section class="contact-cta-card" data-contact-hero aria-labelledby="contact-cta-title">
+    <p class="contact-cta-kicker">Um convite para você</p>
+    <h2 id="contact-cta-title">Seu próximo passo começa aqui</h2>
+    <p>Se algo dentro de você pede mudança, podemos conversar sobre isso com calma e acolhimento.</p>
+    <a href="/contato/agendamento/">Escolher um horário <span aria-hidden="true">↗</span></a>
+  </section>
+)}
+<style>
+  .contact-cta-card{border:1px solid rgb(var(--color-line));border-radius:1.5rem;background:rgb(var(--color-card)/.92);padding:1.5rem;box-shadow:0 12px 30px rgb(var(--color-base)/.06)}
+  .contact-cta-kicker{margin:0 0 .6rem;color:rgb(var(--color-accent));font-size:.72rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase}
+  .contact-cta-card h2{margin:0;color:rgb(var(--color-accent));font-size:1.45rem;line-height:1.2}
+  .contact-cta-card p:not(.contact-cta-kicker){margin:.8rem 0 1.2rem;line-height:1.6;color:rgb(var(--color-base)/.8)}
+  .contact-cta-card a{display:inline-flex;align-items:center;gap:.45rem;border-radius:999px;background:rgb(var(--color-accent));padding:.7rem 1rem;color:rgb(var(--color-inverted));font-size:.85rem;font-weight:600;transition:opacity .2s ease}
+  .contact-cta-card a:hover{opacity:.88}
+  .contact-strip{position:fixed;top:var(--contact-strip-top,5.9rem);left:50%;z-index:35;display:flex;width:min(50rem,calc(100% - 2rem));transform:translate(-50%,-160%);align-items:center;justify-content:space-between;gap:1rem;border:1px solid rgb(var(--color-line));border-radius:999px;background:rgb(var(--color-card)/.96);padding:.65rem 1rem .65rem 1.2rem;box-shadow:0 10px 28px rgb(var(--color-base)/.14);backdrop-filter:blur(12px);color:rgb(var(--color-base));transition:transform .35s ease}
+  .contact-strip.is-visible{transform:translate(-50%,0)}
+  .contact-strip strong{border-radius:999px;background:rgb(var(--color-accent));padding:.48rem .8rem;color:rgb(var(--color-inverted));font-size:.78rem;white-space:nowrap}
+  @media(max-width:640px){.contact-strip{top:4.9rem;width:calc(100% - 1rem);padding:.55rem .65rem .55rem .9rem}.contact-strip>span{font-size:.78rem;line-height:1.2}.contact-strip strong{padding:.55rem .7rem;font-size:.74rem}}
+  @media(prefers-reduced-motion:reduce){.contact-strip{transition:none}}
+</style>

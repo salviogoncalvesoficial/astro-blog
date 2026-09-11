@@ -87,5 +87,31 @@ export async function handler(event) {
     });
     return json(200, { ok: true });
   }
+  if (action === "reprocess") {
+    // Corrige e-mails antigos: busca o conteúdo completo na API do Resend
+    // (traz o remetente com nome de exibição e o HTML original) e regrava o registro.
+    if (!process.env.RESEND_API_KEY) return json(500, { ok: false, error: "RESEND_API_KEY não configurada" });
+    const msgs = await listMessages();
+    let fixed = 0, failed = 0;
+    for (const m of msgs) {
+      if (m.folder === "sent") continue;
+      try {
+        const res = await fetch(`https://api.resend.com/emails/receiving/${m.id}`, { headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` } });
+        if (!res.ok) { failed++; continue; }
+        const full = await res.json();
+        await store.setJSON(m.id, {
+          ...m,
+          from: full.from || m.from,
+          text: full.text ?? m.text ?? "",
+          html: full.html ?? m.html ?? "",
+        });
+        fixed++;
+      } catch (err) {
+        console.error("[reprocess] erro em", m.id, err?.message);
+        failed++;
+      }
+    }
+    return json(200, { ok: true, fixed, failed });
+  }
   return json(400, { ok: false, error: "Ação desconhecida" });
 }

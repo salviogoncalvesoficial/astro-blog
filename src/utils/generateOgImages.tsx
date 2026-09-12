@@ -5,11 +5,12 @@ import postOgImage from "./og-templates/post";
 import siteOgImage from "./og-templates/site";
 
 const fetchFonts = async () => {
-  // Google Fonts CDN — URLs apontam diretamente para arquivos WOFF2 binários.
-  // O antigo 1001fonts.com/download/font retornava HTML, quebrando o Satori.
+  // TTF oficial do Google Fonts: formato aceito pelo opentype.js/Satori.
+  // As URLs anteriores retornavam HTML (1001fonts) ou WOFF2 (Google CDN),
+  // formatos que não são aceitos pela versão do opentype.js deste projeto.
   const [regularResponse, boldResponse] = await Promise.all([
-    fetch("https://fonts.gstatic.com/s/ibmplexmono/v20/-F63fjptAgt5VM-kVkqdyU8n1i8q1w.woff2"),
-    fetch("https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3vAOwlBFgg.woff2"),
+    fetch("https://raw.githubusercontent.com/google/fonts/main/ofl/ibmplexmono/IBMPlexMono-Regular.ttf"),
+    fetch("https://raw.githubusercontent.com/google/fonts/main/ofl/ibmplexmono/IBMPlexMono-Bold.ttf"),
   ]);
   if (!regularResponse.ok || !boldResponse.ok) {
     throw new Error(`Falha ao carregar fontes OG: regular=${regularResponse.status}, bold=${boldResponse.status}`);

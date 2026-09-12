@@ -1,3 +1,5 @@
+self.addEventListener("install", e => self.skipWaiting());
+self.addEventListener("activate", e => e.waitUntil(clients.claim()));
 self.addEventListener("push", event => {
   let data = { title: "Inbox do Salvio", body: "Você recebeu uma nova mensagem", url: "/admin/" };
   try { data = { ...data, ...(event.data ? event.data.json() : {}) }; } catch {}

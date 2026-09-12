@@ -143,7 +143,9 @@ export async function handler(event) {
     const msg = await store.get(id, { type: "json" });
     if (!msg) return json(404, { ok: false, error: "Mensagem não encontrada" });
     if (!msg.read) { await store.setJSON(id, { ...msg, read: true }); msg.read = true; }
-    return json(200, { ok: true, msg: { folder: "inbox", favorite: false, ...msg } });
+    const meta = { ...msg };
+    if (Array.isArray(meta.attachments)) meta.attachments = meta.attachments.map(({ filename, content_type }) => ({ filename, content_type }));
+    return json(200, { ok: true, msg: { folder: "inbox", favorite: false, ...meta } });
   }
   if (action === "set-meta") {
     const msg = await store.get(id, { type: "json" });
@@ -231,7 +233,7 @@ export async function handler(event) {
       id: sentId, folder: "sent", read: true, favorite: false,
       from: "Salvio Goncalves <contato@salviogoncalves.com.br>",
       to: to, subject: subject || "Re: sua mensagem", text: payload.text, html: finalHtml,
-      attachments: atts.map(({ filename, content_type }) => ({ filename, content_type })),
+      attachments: atts,
       sentAt: new Date().toISOString(),
     });
     return json(200, { ok: true });
@@ -257,7 +259,7 @@ export async function handler(event) {
       id: sentId, folder: "sent", read: true, favorite: false,
       from: "Salvio Goncalves <contato@salviogoncalves.com.br>",
       to: emails.join(", "), subject: subject || "(sem assunto)", text: payload.text, html: finalHtml,
-      attachments: atts.map(({ filename, content_type }) => ({ filename, content_type })),
+      attachments: atts,
       sentAt: new Date().toISOString(),
     });
     return json(200, { ok: true });

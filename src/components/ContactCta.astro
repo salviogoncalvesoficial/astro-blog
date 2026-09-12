@@ -30,9 +30,9 @@ const { compact = false, margin = false, docked = false } = Astro.props;
   .contact-strip{position:fixed;top:.6rem;left:50%;z-index:35;display:flex;width:min(50rem,calc(100% - 1rem));transform:translate(-50%,-200%);align-items:center;justify-content:space-between;gap:1rem;border:1px solid rgb(var(--color-line));border-radius:999px;background:rgb(var(--color-card)/.96);padding:.6rem .75rem .6rem 1.1rem;box-shadow:0 8px 24px rgb(var(--color-base)/.16);backdrop-filter:blur(12px);color:rgb(var(--color-base));transition:transform .3s ease}
   .contact-strip.is-visible{transform:translate(-50%,0)}
   .contact-strip strong{border-radius:999px;background:rgb(var(--color-accent));padding:.5rem .8rem;color:rgb(var(--color-inverted));font-size:.78rem;white-space:nowrap}
-  /* Variante acoplada (Temas): nasce abaixo do header e fica sticky no topo
-     somente quando o header sai da tela pela rolagem */
-  .contact-strip.docked{position:sticky;transform:none;transition:none}
+  /* Variante acoplada (Temas): renderizada no fluxo logo abaixo do Header;
+     ao rolar, gruda no topo (sticky) e permanece até o fim da página */
+  .contact-strip.docked{position:sticky;top:.5rem;transform:none;transition:none;margin:.5rem auto 0;width:min(50rem,calc(100% - 2rem))}
   @media(min-width:1536px){.contact-strip{display:none!important}}
   @media(prefers-reduced-motion:reduce){.contact-strip{transition:none}}
 </style>

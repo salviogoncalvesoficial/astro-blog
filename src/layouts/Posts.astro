@@ -7,10 +7,10 @@ import Footer from "@components/Footer.astro";
 import Pagination from "@components/Pagination.astro";
 import Card from "@components/Card";
 import NewsletterBlock from "@components/NewsletterBlock.astro";
+import ContactCta from "@components/ContactCta.astro";
 import { getCollection } from "astro:content";
 import { getFirstImage } from "@utils/getFirstImage";
 import getUniqueTags from "@utils/getUniqueTags";
-import { slugifyStr } from "@utils/slugify";
 import { SITE } from "@config";
 export interface Props {
   currentPage: number;
@@ -18,12 +18,12 @@ export interface Props {
   paginatedPosts: CollectionEntry<"blog">[];
 }
 const { currentPage, totalPages, paginatedPosts } = Astro.props;
-// Temas: todas as tags do blog (não só desta página), para o bloco ser completo
 const allPosts = await getCollection("blog");
 const temas = getUniqueTags(allPosts);
 ---
 <Layout title={`Artigos | ${SITE.title}`}>
   <Header activeNav="posts" sticky />
+  <ContactCta compact docked />
   <Main pageTitle="Artigos" pageDesc="Todos os artigos que publiquei.">
     <div class="posts-layout">
       <ul class="posts-grid">
@@ -45,11 +45,7 @@ const temas = getUniqueTags(allPosts);
               <h2 class="temas-title">Temas</h2>
               <ul class="temas-list">
                 {temas.map(({ tag, tagName }) => (
-                  <li>
-                    <a href={`/tags/${tag}/`} class="tema-link">
-                      {tagName}
-                    </a>
-                  </li>
+                  <li><a href={`/tags/${tag}/`} class="tema-link">{tagName}</a></li>
                 ))}
               </ul>
             </div>
@@ -68,52 +64,17 @@ const temas = getUniqueTags(allPosts);
   <Footer noMarginTop={totalPages > 1} />
 </Layout>
 <style>
-  /* ===== Artigos: 2 colunas de posts + coluna de Temas ===== */
-  .posts-layout {
-    @apply grid grid-cols-1 gap-8;
-  }
-  .posts-grid {
-    @apply grid grid-cols-1 gap-x-6 gap-y-10;
-  }
-  @media (min-width: 640px) {
-    .posts-grid {
-      @apply grid-cols-2;
-    }
-  }
+  .posts-layout { @apply grid grid-cols-1 gap-8; }
+  .posts-grid { @apply grid grid-cols-1 gap-x-6 gap-y-10; }
+  @media (min-width: 640px) { .posts-grid { @apply grid-cols-2; } }
   @media (min-width: 1024px) {
-    .posts-layout {
-      grid-template-columns: minmax(0, 1fr) 230px;
-    }
-    .temas-sidebar {
-      @apply self-start;
-      position: sticky;
-      /* abaixo do header fixo (que tem ~8rem de altura) + respiro */
-      top: 10rem;
-    }
+    .posts-layout { grid-template-columns: minmax(0, 1fr) 230px; }
+    .temas-sidebar { @apply self-start; position: sticky; top: 10rem; }
   }
-  /* ===== Bloco de Temas ===== */
-  .temas-card {
-    @apply rounded-2xl border border-skin-line bg-skin-card p-5;
-  }
-  .temas-title {
-    @apply mb-3 text-center text-sm font-semibold uppercase tracking-wide text-skin-accent;
-  }
-  .temas-list {
-    @apply flex flex-col gap-2;
-  }
-  .temas-list li {
-    @apply m-0 flex items-center gap-2;
-  }
-  /* bolinha no verde-sálvia da identidade */
-  .temas-list li::before {
-    content: "";
-    flex-shrink: 0;
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 9999px;
-    background: rgb(var(--color-accent));
-  }
-  .tema-link {
-    @apply text-sm text-skin-base transition-colors hover:text-skin-accent;
-  }
+  .temas-card { @apply rounded-2xl border border-skin-line bg-skin-card p-5; }
+  .temas-title { @apply mb-3 text-center text-sm font-semibold uppercase tracking-wide text-skin-accent; }
+  .temas-list { @apply flex flex-col gap-2; }
+  .temas-list li { @apply m-0 flex items-center gap-2; }
+  .temas-list li::before { content: ""; flex-shrink: 0; width: .5rem; height: .5rem; border-radius: 9999px; background: rgb(var(--color-accent)); }
+  .tema-link { @apply text-sm text-skin-base transition-colors hover:text-skin-accent; }
 </style>

@@ -1,0 +1,101 @@
+---
+const { slug } = Astro.props;
+---
+<section class="post-engagement" data-like-box data-slug={slug} aria-label="Interação com o artigo">
+  <div class="like-area">
+    <p class="like-question">Este texto fez sentido para você?</p>
+    <button class="like-button" type="button" data-like-button aria-pressed="false">
+      <span class="like-heart" aria-hidden="true">♡</span>
+      <span data-like-label>Gostei deste artigo</span>
+    </button>
+    <p class="like-count" data-like-count hidden></p>
+  </div>
+  <div class="like-newsletter" data-like-newsletter hidden>
+    <p class="like-thanks">Você gostou deste artigo.</p>
+    <p class="like-invite">Se este texto fez sentido para você, continue por perto. Novas reflexões chegarão diretamente no seu e-mail.</p>
+    <form class="like-newsletter-form" data-like-form novalidate>
+      <input type="text" name="website" class="like-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <input type="email" name="email" required placeholder="Seu melhor e-mail" aria-label="Seu melhor e-mail" />
+      <button type="submit">Quero receber novas reflexões</button>
+    </form>
+    <p class="like-newsletter-feedback" data-like-feedback role="status"></p>
+    <p class="like-privacy">Sem spam. Você pode cancelar com 1 clique, a qualquer momento.</p>
+  </div>
+</section>
+<style>
+  .post-engagement{margin-top:3rem;border-top:1px solid rgb(var(--color-line));border-bottom:1px solid rgb(var(--color-line));padding:2rem 0;text-align:center}
+  .like-question{margin:0 0 .9rem;font-size:.95rem;opacity:.8}
+  .like-button{display:inline-flex;align-items:center;gap:.55rem;border:1px solid rgb(var(--color-accent));border-radius:999px;background:transparent;padding:.7rem 1.2rem;color:rgb(var(--color-accent));font-size:.9rem;cursor:pointer;transition:background .2s,color .2s,transform .2s}
+  .like-button:hover{background:rgb(var(--color-accent)/.09)}
+  .like-button:active{transform:scale(.98)}
+  .like-button.is-liked{background:rgb(var(--color-accent));color:rgb(var(--color-inverted))}
+  .like-heart{font-size:1.35rem;line-height:.8}
+  .like-count{margin:.7rem 0 0;font-size:.75rem;opacity:.65}
+  .like-newsletter{margin:1.6rem auto 0;max-width:34rem;border-radius:1rem;background:rgb(var(--color-card-muted)/.55);padding:1.4rem 1.2rem}
+  .like-thanks{margin:0;color:rgb(var(--color-accent));font-weight:600}
+  .like-invite{margin:.45rem auto 1rem;max-width:29rem;font-size:.9rem;line-height:1.55;opacity:.8}
+  .like-newsletter-form{display:flex;flex-direction:column;gap:.6rem;margin:auto;max-width:28rem}
+  .like-newsletter-form input{width:100%;border:1px solid rgb(var(--color-line));border-radius:999px;background:rgb(var(--color-fill));padding:.7rem 1rem;color:rgb(var(--color-base));font-size:.85rem;outline:none}
+  .like-newsletter-form input:focus{border-color:rgb(var(--color-accent))}
+  .like-newsletter-form button{border:0;border-radius:999px;background:rgb(var(--color-accent));padding:.7rem 1rem;color:rgb(var(--color-inverted));font-size:.82rem;cursor:pointer}
+  .like-newsletter-form button:disabled{opacity:.6}
+  .like-newsletter-feedback{min-height:1.2rem;margin:.8rem 0 0;font-size:.82rem;color:rgb(var(--color-accent))}
+  .like-newsletter-feedback.error{color:#b45353}
+  .like-privacy{margin:.6rem 0 0;font-size:.7rem;opacity:.55}
+  .like-honeypot{display:none!important}
+  @media(min-width:640px){.like-newsletter-form{flex-direction:row}.like-newsletter-form input{flex:1}.like-newsletter-form button{white-space:nowrap}}
+</style>
+<script>
+  function bindPostLike() {
+    const box = document.querySelector("[data-like-box]");
+    if (!box || box.dataset.bound) return;
+    box.dataset.bound = "1";
+    const slug = box.dataset.slug;
+    const button = box.querySelector("[data-like-button]");
+    const label = box.querySelector("[data-like-label]");
+    const count = box.querySelector("[data-like-count]");
+    const newsletter = box.querySelector("[data-like-newsletter]");
+    const form = box.querySelector("[data-like-form]");
+    const feedback = box.querySelector("[data-like-feedback]");
+    if (!slug || !button || !label || !newsletter || !form) return;
+    const storageKey = `post-like:${slug}`;
+    let visitorId = localStorage.getItem("blog-like-visitor");
+    if (!visitorId) {
+      visitorId = `${crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`}`;
+      localStorage.setItem("blog-like-visitor", visitorId);
+    }
+    const formatCount = (n) => n === 1 ? "1 pessoa gostou deste artigo" : `${n} pessoas gostaram deste artigo`;
+    const paint = (n, liked) => {
+      if (liked) { button.classList.add("is-liked"); button.setAttribute("aria-pressed", "true"); label.textContent = "Você gostou deste artigo"; newsletter.hidden = false; }
+      if (n > 0) { count.textContent = formatCount(n); count.hidden = false; }
+    };
+    fetch(`/.netlify/functions/likes?slug=${encodeURIComponent(slug)}`).then(r => r.json()).then(data => {
+      if (data.status === "ok") paint(data.count || 0, localStorage.getItem(storageKey) === "1");
+    }).catch(() => {});
+    button.addEventListener("click", async () => {
+      if (localStorage.getItem(storageKey) === "1") return;
+      button.disabled = true;
+      try {
+        const response = await fetch("/.netlify/functions/likes", { method:"POST", headers:{"Content-Type":"application/json","Accept":"application/json"}, body:JSON.stringify({slug, visitorId}) });
+        const data = await response.json();
+        if (data.status === "ok") { localStorage.setItem(storageKey, "1"); paint(data.count || 0, true); }
+      } finally { button.disabled = false; }
+    });
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const input = form.querySelector('input[type="email"]');
+      const submit = form.querySelector("button");
+      if (!input || !submit) return;
+      submit.disabled = true; submit.textContent = "Enviando..."; feedback.textContent = ""; feedback.classList.remove("error");
+      try {
+        const response = await fetch("/.netlify/functions/inscrever", { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded","Accept":"application/json"}, body:`email=${encodeURIComponent(input.value)}&website=${encodeURIComponent(form.querySelector('[name="website"]')?.value || "")}` });
+        const data = await response.json();
+        if (data.status === "ok") { form.hidden = true; feedback.textContent = "Pronto. A partir de agora, novas reflexões chegarão até você."; }
+        else { feedback.textContent = "Confira o e-mail e tente novamente."; feedback.classList.add("error"); }
+      } catch { feedback.textContent = "Não consegui enviar agora. Tente novamente em instantes."; feedback.classList.add("error"); }
+      finally { submit.disabled = false; submit.textContent = "Quero receber novas reflexões"; }
+    });
+  }
+  bindPostLike();
+  document.addEventListener("astro:after-swap", bindPostLike);
+</script>

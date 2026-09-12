@@ -5,18 +5,19 @@ import postOgImage from "./og-templates/post";
 import siteOgImage from "./og-templates/site";
 
 const fetchFonts = async () => {
-  // Regular Font
-  const fontFileRegular = await fetch(
-    "https://www.1001fonts.com/download/font/ibm-plex-mono.regular.ttf"
-  );
-  const fontRegular: ArrayBuffer = await fontFileRegular.arrayBuffer();
-
-  // Bold Font
-  const fontFileBold = await fetch(
-    "https://www.1001fonts.com/download/font/ibm-plex-mono.bold.ttf"
-  );
-  const fontBold: ArrayBuffer = await fontFileBold.arrayBuffer();
-
+  // Google Fonts CDN — URLs apontam diretamente para arquivos WOFF2 binários.
+  // O antigo 1001fonts.com/download/font retornava HTML, quebrando o Satori.
+  const [regularResponse, boldResponse] = await Promise.all([
+    fetch("https://fonts.gstatic.com/s/ibmplexmono/v20/-F63fjptAgt5VM-kVkqdyU8n1i8q1w.woff2"),
+    fetch("https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3vAOwlBFgg.woff2"),
+  ]);
+  if (!regularResponse.ok || !boldResponse.ok) {
+    throw new Error(`Falha ao carregar fontes OG: regular=${regularResponse.status}, bold=${boldResponse.status}`);
+  }
+  const [fontRegular, fontBold] = await Promise.all([
+    regularResponse.arrayBuffer(),
+    boldResponse.arrayBuffer(),
+  ]);
   return { fontRegular, fontBold };
 };
 

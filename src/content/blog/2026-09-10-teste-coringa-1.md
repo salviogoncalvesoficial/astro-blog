@@ -2,7 +2,7 @@
 author: Sálvio Gonçalves
 pubDatetime: 2026-09-10T00:00:00.000Z
 modDatetime: 2026-09-10T00:00:00.000Z
-title: Ana Moura
+title: Doces e memórias
 ogImage: "/1789139794162-capa-1789139792633.webp"
 featured: true
 draft: false

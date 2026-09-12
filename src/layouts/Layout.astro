@@ -20,7 +20,11 @@ const isContactPage = Astro.url.pathname.startsWith("/contato");
     const cards=document.querySelectorAll("[data-contact-hero]");
     const card=cards[0];
     if(!card){strip.classList.add("is-visible");return}
-    const observer=new IntersectionObserver(([entry])=>strip.classList.toggle("is-visible",!entry.isIntersecting),{threshold:0.08});
+    // A faixa só aparece quando a caixa completa saiu da tela POR CIMA
+    // (o visitante rolou além dela) — nunca no carregamento da página.
+    const observer=new IntersectionObserver(([entry])=>{
+      strip.classList.toggle("is-visible",entry.boundingClientRect.bottom<0&&!entry.isIntersecting);
+    },{threshold:0});
     observer.observe(card);
   }
   setupContactCta();

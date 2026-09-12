@@ -4,6 +4,7 @@ import Breadcrumbs from "@components/Breadcrumbs.astro";
 import Footer from "@components/Footer.astro";
 import Header from "@components/Header.astro";
 import Layout from "./Layout.astro";
+import ContactCta from "@components/ContactCta.astro";
 export interface Props {
   frontmatter: {
     title: string;
@@ -40,6 +41,10 @@ const { frontmatter } = Astro.props;
     <section id="about" class="prose about-body prose-img:border-0">
       <slot />
     </section>
+    <!-- Convite final: caixa de agendamento semelhante à da home -->
+    <section class="about-cta" aria-label="Agende uma conversa">
+      <ContactCta />
+    </section>
   </main>
   <Footer />
 </Layout>
@@ -71,5 +76,9 @@ const { frontmatter } = Astro.props;
   /* ===== Corpo do texto ===== */
   .about-body {
     @apply mt-12 max-w-none;
+  }
+  /* ===== Convite final ===== */
+  .about-cta {
+    @apply mt-14 max-w-md;
   }
 </style>

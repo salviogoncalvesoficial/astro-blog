@@ -5,6 +5,7 @@ import Footer from "@components/Footer.astro";
 import Tag from "@components/Tag.astro";
 import Datetime from "@components/Datetime";
 import NewsletterBlock from "@components/NewsletterBlock.astro";
+import PostEngagement from "@components/PostEngagement.astro";
 import type { CollectionEntry } from "astro:content";
 import { slugifyStr } from "@utils/slugify";
 import ShareLinks from "@components/ShareLinks.astro";
@@ -33,7 +34,6 @@ const ogUrl = new URL(
   ogImageUrl ?? `/posts/${slugifyStr(title)}.png`,
   Astro.url.origin
 ).href;
-// ---- Capa dedicada: vem exclusivamente do campo ogImage do frontmatter ----
 const coverImage = ogImageUrl;
 const layoutProps = {
   title: `${title} | ${SITE.title}`,
@@ -45,8 +45,6 @@ const layoutProps = {
   ogImage: ogUrl,
   scrollSmooth: true,
 };
-// ---- Destaques do fim do post: sempre 3 convites de leitura ----
-// Régua: 1º posts com tags em comum, 2º marcados como destaque, 3º mais recentes
 const allPosts = await getCollection("blog");
 const otherPosts = allPosts
   .filter(({ data }) => !data.draft)
@@ -76,314 +74,64 @@ const highlightPosts = [...related, ...featured, ...recent].slice(0, 3);
 <Layout {...layoutProps}>
   <Header />
   <div class="mx-auto flex w-full max-w-5xl justify-start px-4">
-    <button
-      class="focus-outline mb-2 mt-8 flex hover:opacity-75"
-      onclick="(() => (history.length === 1) ? window.location = '/' : history.back())()"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg"
-        ><path
-          d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z"
-        ></path>
-      </svg><span>Voltar</span>
+    <button class="focus-outline mb-2 mt-8 flex hover:opacity-75" onclick="(() => (history.length === 1) ? window.location = '/' : history.back())()">
+      <svg xmlns="http://www.w3.org/2000/svg"><path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z"></path></svg><span>Voltar</span>
     </button>
   </div>
   <main id="main-content" class="post-layout">
     <div class="post-main">
-      {
-        coverImage && (
-          <img
-            src={coverImage}
-            alt={title}
-            class="post-cover"
-            loading="eager"
-          />
-        )
-      }
+      {coverImage && <img src={coverImage} alt={title} class="post-cover" loading="eager" />}
       <h1 transition:name={slugifyStr(title)} class="post-title">{title}</h1>
-      <Datetime
-        pubDatetime={pubDatetime}
-        modDatetime={modDatetime}
-        size="lg"
-        className="my-2"
-      />
-      {
-        showToc && tocHeadings.length > 0 && (
-          <details class="toc-mobile">
-            <summary>Neste artigo</summary>
-            <nav class="toc" aria-label="Sumário do artigo">
-              <ul>
-                {tocHeadings.map((h) => (
-                  <li class:list={{ "toc-sub": h.depth === 3 }}>
-                    <a href={`#${h.slug}`}>{h.text}</a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </details>
-        )
-      }
-      <article id="article" role="article" class="prose mt-8">
-        <Content />
-      </article>
-      <ul class="my-8 flex flex-wrap gap-2">
-        {tags.map(tag => <Tag tag={slugifyStr(tag)} />)}
-      </ul>
-      <div
-        class="flex flex-col-reverse items-center justify-between gap-6 sm:flex-row-reverse sm:items-end sm:gap-4"
-      >
-        <button
-          id="back-to-top"
-          class="focus-outline whitespace-nowrap py-1 hover:opacity-75"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="rotate-90">
-            <path
-              d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z"
-            ></path>
-          </svg>
-          <span>Voltar ao topo</span>
-        </button>
+      <Datetime pubDatetime={pubDatetime} modDatetime={modDatetime} size="lg" className="my-2" />
+      {showToc && tocHeadings.length > 0 && <details class="toc-mobile"><summary>Neste artigo</summary><nav class="toc" aria-label="Sumário do artigo"><ul>{tocHeadings.map((h) => <li class:list={{ "toc-sub": h.depth === 3 }}><a href={`#${h.slug}`}>{h.text}</a></li>)}</ul></nav></details>}
+      <article id="article" role="article" class="prose mt-8"><Content /></article>
+      <ul class="my-8 flex flex-wrap gap-2">{tags.map(tag => <Tag tag={slugifyStr(tag)} />)}</ul>
+      <div class="flex flex-col-reverse items-center justify-between gap-6 sm:flex-row-reverse sm:items-end sm:gap-4">
+        <button id="back-to-top" class="focus-outline whitespace-nowrap py-1 hover:opacity-75"><svg xmlns="http://www.w3.org/2000/svg" class="rotate-90"><path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z"></path></svg><span>Voltar ao topo</span></button>
         <ShareLinks />
       </div>
-      {
-        highlightPosts.length > 0 && (
-          <section class="related-posts">
-            <h2>Destaques</h2>
-            <div class="related-grid">
-              {highlightPosts.map(({ data, slug, body }) => {
-                const imgSrc =
-                  typeof data.ogImage === "string"
-                    ? data.ogImage
-                    : data.ogImage?.src ?? getFirstImage(body ?? "");
-                return (
-                  <a href={`/posts/${slug}/`} class="related-card">
-                    <div class="related-thumb">
-                      {imgSrc ? (
-                        <img src={imgSrc} alt="" loading="lazy" />
-                      ) : (
-                        <span
-                          class="related-thumb-fallback"
-                          aria-hidden="true"
-                        ></span>
-                      )}
-                    </div>
-                    <div class="related-body">
-                      <h3>{data.title}</h3>
-                      <Datetime pubDatetime={data.pubDatetime} size="sm" />
-                    </div>
-                  </a>
-                );
-              })}
-            </div>
-          </section>
-        )
-      }
+      {highlightPosts.length > 0 && <section class="related-posts"><h2>Destaques</h2><div class="related-grid">{highlightPosts.map(({ data, slug, body }) => { const imgSrc = typeof data.ogImage === "string" ? data.ogImage : data.ogImage?.src ?? getFirstImage(body ?? ""); return <a href={`/posts/${slug}/`} class="related-card"><div class="related-thumb">{imgSrc ? <img src={imgSrc} alt="" loading="lazy" /> : <span class="related-thumb-fallback" aria-hidden="true"></span>}</div><div class="related-body"><h3>{data.title}</h3><Datetime pubDatetime={data.pubDatetime} size="sm" /></div></a>; })}</div></section>}
+      <PostEngagement slug={post.slug} />
       <NewsletterBlock />
     </div>
-
   </main>
   <Footer />
 </Layout>
 <style>
-  /* ===== Layout: coluna única centralizada ===== */
-  .post-layout {
-    @apply mx-auto w-full max-w-[50rem] grid-cols-1 px-4 pb-12;
-  }
-  .post-main {
-    @apply min-w-0;
-  }
-  .post-title {
-    @apply text-2xl font-semibold text-skin-accent sm:text-3xl;
-  }
-  /* ===== Capa dedicada — proporção banner 770 x 330 ===== */
-  .post-cover {
-    @apply mb-6 w-full rounded-2xl border border-skin-line object-cover;
-    aspect-ratio: 770 / 330;
-  }
-  /* ===== Sumário (TOC) ===== */
-  .toc-mobile {
-    @apply my-6 rounded-xl border border-skin-line bg-skin-card p-4 sm:hidden;
-  }
-  .toc-mobile summary {
-    @apply cursor-pointer font-semibold text-skin-accent;
-  }
-  .toc ul {
-    @apply mt-3 space-y-2;
-  }
-  .toc li a {
-    @apply block text-sm text-skin-base hover:text-skin-accent;
-  }
-  .toc li.toc-sub a {
-    @apply pl-4 text-xs opacity-80;
-  }
-  /* ===== Artigo ocupa a coluna inteira (o tema limita .prose a 65ch) ===== */
-  .post-main :global(article.prose) {
-    max-width: 100%;
-  }
-  /* ===== Padronização: mídia na largura da coluna ===== */
-  .post-main :global(.video-wrap) {
-    position: relative;
-    width: 100%;
-    padding-bottom: 56.25%;
-    height: 0;
-    margin: 1.5rem 0;
-    border-radius: 1rem;
-    overflow: hidden;
-    border: 1px solid rgb(var(--color-line));
-  }
-  .post-main :global(.video-wrap iframe) {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
-  }
-  .post-main :global(img) {
-    width: 100%;
-    border-radius: 1rem;
-  }
-  /* ===== Destaques (fim do post) ===== */
-  .related-posts {
-    @apply mt-12;
-  }
-  .related-posts h2 {
-    @apply mb-4 text-2xl font-semibold tracking-wide;
-  }
-  .related-grid {
-    @apply grid gap-4 sm:grid-cols-3;
-  }
-  .related-card {
-    @apply overflow-hidden rounded-2xl border border-skin-line bg-skin-card transition-shadow hover:shadow-md;
-  }
-  .related-thumb {
-    @apply aspect-[770/330] w-full overflow-hidden bg-skin-card;
-  }
-  .related-thumb img {
-    @apply h-full w-full object-cover;
-  }
-  .related-thumb-fallback {
-    @apply block h-full w-full;
-    background: linear-gradient(
-      135deg,
-      rgb(var(--color-accent) / 0.15),
-      rgb(var(--color-card) / 0.5)
-    );
-  }
-  .related-body {
-    @apply p-4;
-  }
-  .related-body h3 {
-    @apply text-sm font-semibold leading-snug hover:text-skin-accent;
-  }
+  .post-layout { @apply mx-auto w-full max-w-[50rem] grid-cols-1 px-4 pb-12; }
+  .post-main { @apply min-w-0; }
+  .post-title { @apply text-2xl font-semibold text-skin-accent sm:text-3xl; }
+  .post-cover { @apply mb-6 w-full rounded-2xl border border-skin-line object-cover; aspect-ratio: 770 / 330; }
+  .toc-mobile { @apply my-6 rounded-xl border border-skin-line bg-skin-card p-4 sm:hidden; }
+  .toc-mobile summary { @apply cursor-pointer font-semibold text-skin-accent; }
+  .toc ul { @apply mt-3 space-y-2; }
+  .toc li a { @apply block text-sm text-skin-base hover:text-skin-accent; }
+  .toc li.toc-sub a { @apply pl-4 text-xs opacity-80; }
+  .post-main :global(article.prose) { max-width: 100%; }
+  .post-main :global(.video-wrap) { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; margin: 1.5rem 0; border-radius: 1rem; overflow: hidden; border: 1px solid rgb(var(--color-line)); }
+  .post-main :global(.video-wrap iframe) { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+  .post-main :global(img) { width: 100%; border-radius: 1rem; }
+  .related-posts { @apply mt-12; }
+  .related-posts h2 { @apply mb-4 text-2xl font-semibold tracking-wide; }
+  .related-grid { @apply grid gap-4 sm:grid-cols-3; }
+  .related-card { @apply overflow-hidden rounded-2xl border border-skin-line bg-skin-card transition-shadow hover:shadow-md; }
+  .related-thumb { @apply aspect-[770/330] w-full overflow-hidden bg-skin-card; }
+  .related-thumb img { @apply h-full w-full object-cover; }
+  .related-thumb-fallback { @apply block h-full w-full; background: linear-gradient(135deg, rgb(var(--color-accent) / 0.15), rgb(var(--color-card) / 0.5)); }
+  .related-body { @apply p-4; }
+  .related-body h3 { @apply text-sm font-semibold leading-snug hover:text-skin-accent; }
 </style>
 <script is:inline>
-  /** Create a progress indicator
-   *  at the top */
-  function createProgressBar() {
-    // Create the main container div
-    const progressContainer = document.createElement("div");
-    progressContainer.className =
-      "progress-container fixed top-0 z-10 h-1 w-full bg-skin-fill";
-    // Create the progress bar div
-    const progressBar = document.createElement("div");
-    progressBar.className = "progress-bar h-1 w-0 bg-skin-accent";
-    progressBar.id = "myBar";
-    // Append the progress bar to the progress container
-    progressContainer.appendChild(progressBar);
-    // Append the progress container to the document body or any other desired parent element
-    document.body.appendChild(progressContainer);
-  }
+  function createProgressBar() { const progressContainer = document.createElement("div"); progressContainer.className = "progress-container fixed top-0 z-10 h-1 w-full bg-skin-fill"; const progressBar = document.createElement("div"); progressBar.className = "progress-bar h-1 w-0 bg-skin-accent"; progressBar.id = "myBar"; progressContainer.appendChild(progressBar); document.body.appendChild(progressContainer); }
   createProgressBar();
-  /** Update the progress bar
-   *  when user scrolls */
-  function updateScrollProgress() {
-    const winScroll =
-      document.body.scrollTop || document.documentElement.scrollTop;
-    const height =
-      document.documentElement.scrollHeight -
-      document.documentElement.clientHeight;
-    const scrolled = (winScroll / height) * 100;
-    if (document) {
-      const myBar = document.getElementById("myBar");
-      if (myBar) {
-        myBar.style.width = scrolled + "%";
-      }
-    }
-  }
+  function updateScrollProgress() { const winScroll = document.body.scrollTop || document.documentElement.scrollTop; const height = document.documentElement.scrollHeight - document.documentElement.clientHeight; const scrolled = (winScroll / height) * 100; if (document) { const myBar = document.getElementById("myBar"); if (myBar) myBar.style.width = scrolled + "%"; } }
   document.addEventListener("scroll", updateScrollProgress);
-  /** Attaches links to headings in the document,
-   *  allowing sharing of sections easily */
-  function addHeadingLinks() {
-    let headings = Array.from(document.querySelectorAll("h2, h3, h4, h5, h6"));
-    for (let heading of headings) {
-      heading.classList.add("group");
-      let link = document.createElement("a");
-      link.innerText = "#";
-      link.className = "heading-link hidden group-hover:inline-block ml-2";
-      link.href = "#" + heading.id;
-      link.ariaHidden = "true";
-      heading.appendChild(link);
-    }
-  }
+  function addHeadingLinks() { let headings = Array.from(document.querySelectorAll("h2, h3, h4, h5, h6")); for (let heading of headings) { heading.classList.add("group"); let link = document.createElement("a"); link.innerText = "#"; link.className = "heading-link hidden group-hover:inline-block ml-2"; link.href = "#" + heading.id; link.ariaHidden = "true"; heading.appendChild(link); } }
   addHeadingLinks();
-  /** Remove o H1 inicial do artigo quando ele duplica o título do post
-   *  (o título já aparece acima, inserido pelo layout) */
-  function dedupeTitle() {
-    const article = document.getElementById("article");
-    const postTitle = document.querySelector(".post-title");
-    if (!article || !postTitle) return;
-    const norm = (s) =>
-      s.replace(/\s+/g, " ").trim().replace(/[.,!:;*]/g, "").toLowerCase();
-    const firstH1 = article.querySelector("h1");
-    if (
-      firstH1 &&
-      norm(firstH1.textContent) === norm(postTitle.textContent)
-    ) {
-      firstH1.remove();
-    }
-  }
-  dedupeTitle();
-  document.addEventListener("astro:after-swap", dedupeTitle);
-  /** Attaches copy buttons to code blocks in the document,
-   * allowing users to copy code easily. */
-  function attachCopyButtons() {
-    let copyButtonLabel = "Copy";
-    let codeBlocks = Array.from(document.querySelectorAll("pre"));
-    for (let codeBlock of codeBlocks) {
-      let wrapper = document.createElement("div");
-      wrapper.style.position = "relative";
-      let copyButton = document.createElement("button");
-      copyButton.className =
-        "copy-code absolute right-3 -top-3 rounded bg-skin-card px-2 py-1 text-xs leading-4 text-skin-base font-medium";
-      copyButton.innerHTML = copyButtonLabel;
-      codeBlock.setAttribute("tabindex", "0");
-      codeBlock.appendChild(copyButton);
-      // wrap codebock with relative parent element
-      codeBlock?.parentNode?.insertBefore(wrapper, codeBlock);
-      wrapper.appendChild(codeBlock);
-      copyButton.addEventListener("click", async () => {
-        await copyCode(codeBlock, copyButton);
-      });
-    }
-    async function copyCode(block, button) {
-      let code = block.querySelector("code");
-      let text = code?.innerText;
-      await navigator.clipboard.writeText(text ?? "");
-      // visual feedback that task is completed
-      button.innerText = "Copied";
-      setTimeout(() => {
-        button.innerText = copyButtonLabel;
-      }, 700);
-    }
-  }
+  function dedupeTitle() { const article = document.getElementById("article"); const postTitle = document.querySelector(".post-title"); if (!article || !postTitle) return; const norm = (s) => s.replace(/\s+/g, " ").trim().replace(/[.,!:;*]/g, "").toLowerCase(); const firstH1 = article.querySelector("h1"); if (firstH1 && norm(firstH1.textContent) === norm(postTitle.textContent)) firstH1.remove(); }
+  dedupeTitle(); document.addEventListener("astro:after-swap", dedupeTitle);
+  function attachCopyButtons() { let copyButtonLabel = "Copy"; let codeBlocks = Array.from(document.querySelectorAll("pre")); for (let codeBlock of codeBlocks) { let wrapper = document.createElement("div"); wrapper.style.position = "relative"; let copyButton = document.createElement("button"); copyButton.className = "copy-code absolute right-3 -top-3 rounded bg-skin-card px-2 py-1 text-xs leading-4 text-skin-base font-medium"; copyButton.innerHTML = copyButtonLabel; codeBlock.setAttribute("tabindex", "0"); codeBlock.appendChild(copyButton); codeBlock?.parentNode?.insertBefore(wrapper, codeBlock); wrapper.appendChild(codeBlock); copyButton.addEventListener("click", async () => { await copyCode(codeBlock, copyButton); }); } async function copyCode(block, button) { let code = block.querySelector("code"); let text = code?.innerText; await navigator.clipboard.writeText(text ?? ""); button.innerText = "Copied"; setTimeout(() => { button.innerText = copyButtonLabel; }, 700); } }
   attachCopyButtons();
-  /** Scrolls the document to the top when
-   * the "Back to Top" button is clicked. */
-  function backToTop() {
-    document.querySelector("#back-to-top")?.addEventListener("click", () => {
-      document.body.scrollTop = 0; // For Safari
-      document.documentElement.scrollTop = 0; // For Chrome, Firefox and Opera
-    });
-  }
+  function backToTop() { document.querySelector("#back-to-top")?.addEventListener("click", () => { document.body.scrollTop = 0; document.documentElement.scrollTop = 0; }); }
   backToTop();
 </script>

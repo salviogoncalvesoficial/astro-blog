@@ -1,7 +1,6 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "@layouts/Layout.astro";
-import Main from "@layouts/Main.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import LinkButton from "@components/LinkButton.astro";
@@ -23,34 +22,26 @@ const socialCount = SOCIALS.filter(social => social.active).length;
   <Header activeNav="home" />
   <main id="main-content">
     <section id="hero" class="hero">
-      <div class="hero-shapes" aria-hidden="true">
-        <span class="shape shape-1"></span><span class="shape shape-2"></span><span class="shape shape-3"></span><span class="shape shape-4"></span>
-      </div>
+      <div class="hero-shapes" aria-hidden="true"><span class="shape shape-1"></span><span class="shape shape-2"></span><span class="shape shape-3"></span><span class="shape shape-4"></span></div>
       <div class="hero-grid">
-        <div class="hero-text">
-          <p class="hero-eyebrow">Terapeuta</p>
-          <h1>Um espaço para pensar, sentir e se cuidar</h1>
-          <p class="hero-intro">Aqui você encontra reflexões sobre ansiedade, procrastinação, autoconhecimento e saúde emocional — escritas com acolhimento e profundidade. Um convite para uma vida mais leve e consciente.</p>
-          <div class="hero-cta"><LinkButton href="/about/" className="hero-btn">Conheça meu trabalho</LinkButton></div>
-        </div>
+        <div class="hero-text"><p class="hero-eyebrow">Terapeuta</p><h1>Um espaço para pensar, sentir e se cuidar</h1><p class="hero-intro">Aqui você encontra reflexões sobre ansiedade, procrastinação, autoconhecimento e saúde emocional — escritas com acolhimento e profundidade. Um convite para uma vida mais leve e consciente.</p><div class="hero-cta"><LinkButton href="/about/" className="hero-btn">Conheça meu trabalho</LinkButton></div></div>
         <div class="hero-photo"><div class="photo-arc" aria-hidden="true"></div><img src="/hero-salvio.png" alt="Salvio Gonçalves, terapeuta" width="600" height="900" loading="eager" /></div>
-        <div class="hero-contact"><ContactCta margin /></div>
+        <div class="hero-contact-mobile"><ContactCta /></div>
       </div>
       {socialCount > 0 && <div class="social-wrapper"><div class="social-links">Siga:</div><Socials /></div>}
     </section>
+    <div class="contact-trail" aria-label="Agendamento"><ContactCta margin /></div>
     <Hr />
     {featuredPosts.length > 0 && <><section id="featured"><h2>Destaques</h2><ul>{featuredPosts.map((post) => <Card href={`/posts/${post.slug}/`} frontmatter={post.data} image={getFirstImage(post.body)} className="my-0" secHeading={false} />)}</ul></section>{recentPosts.length > 0 && <Hr />}</>}
     {recentPosts.length > 0 && <section id="recent-posts"><h2>Posts Recentes</h2><ul>{recentPosts.map((post, index) => index < 4 && <Card href={`/posts/${post.slug}/`} frontmatter={post.data} image={getFirstImage(post.body)} className="my-0" secHeading={false} />)}</ul></section>}
-    <div class="all-posts-btn-wrapper"><LinkButton href="/posts/">Ver todos os posts<svg xmlns="http://www.w3.org/2000/svg"><path d="m11.293 17.293 1.414 1.414L19.414 12l-6.707-6.707-1.414 1.414L15.586 11H6v2h9.586z"></path></svg></LinkButton></div>
+    <div class="all-posts-btn-wrapper"><LinkButton href="/posts/">Ver todos os posts<svg xmlns="http://www.w3.org/2000/svg"><path d="m11.293 17.293 1.414 1.414L19.414 12l-6.707-6.707 1.414 1.414L15.586 11H6v2h9.586z"></path></svg></LinkButton></div>
     <NewsletterBlock />
   </main>
   <Footer />
 </Layout>
 <style>
-#hero{@apply relative mx-auto w-full max-w-5xl overflow-hidden px-4 pb-10 pt-10 sm:pt-14}.hero-shapes{@apply pointer-events-none absolute inset-0}.shape{@apply absolute block rounded-full}.shape-1{@apply -right-16 -top-16 h-56 w-56 bg-skin-accent opacity-[0.07] sm:h-72 sm:w-72}.shape-2{@apply -left-10 top-8 h-24 w-24 bg-skin-card-muted opacity-40 sm:h-32 sm:w-32}.shape-3{@apply bottom-4 left-1/4 h-16 w-16 bg-skin-accent opacity-[0.06]}.shape-4{@apply right-1/4 top-1/3 h-10 w-10 border-2 border-skin-accent opacity-20}.hero-grid{@apply relative grid items-center gap-10 sm:grid-cols-[1.2fr_1fr] sm:gap-12}.hero-text{@apply relative z-10}.hero-eyebrow{@apply mb-3 inline-block rounded-full border border-skin-line px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-skin-accent}#hero h1{@apply my-3 text-3xl font-bold leading-tight sm:text-5xl}.hero-intro{@apply my-4 max-w-md text-base leading-relaxed text-skin-base opacity-80}.hero-cta{@apply mt-6 flex items-center gap-4}.hero-btn{@apply inline-flex items-center rounded-full bg-skin-accent px-6 py-3 text-sm font-medium text-skin-inverted transition-colors hover:opacity-90}.hero-photo{@apply relative z-10 mx-auto w-full max-w-[280px] sm:max-w-[340px]}.photo-arc{@apply absolute -inset-3 -z-10;border-radius:50% 50% 45% 45% / 60% 60% 40% 40%;background-color:rgb(var(--color-accent));opacity:.12}.hero-photo img{@apply w-full rounded-[2rem] border-2 border-skin-line object-cover shadow-xl;aspect-ratio:2 / 3}.hero-contact{display:none}.social-wrapper{@apply relative z-10 mt-8 flex flex-col gap-2 sm:flex-row sm:items-center}.social-links{@apply mr-2 whitespace-nowrap text-sm opacity-70}#featured,#recent-posts{@apply mx-auto w-full max-w-5xl px-4 pb-6 pt-12}#featured h2,#recent-posts h2{@apply text-2xl font-semibold tracking-wide}#featured ul{display:grid;grid-template-columns:1fr;gap:1.5rem;margin-top:1.5rem}@media(min-width:640px){#featured ul{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(min-width:1024px){#featured ul{grid-template-columns:repeat(3,minmax(0,1fr))}}#recent-posts ul{display:grid;grid-template-columns:1fr;gap:1.5rem;margin-top:1.5rem}@media(min-width:640px){#recent-posts ul{grid-template-columns:repeat(2,minmax(0,1fr))}}.all-posts-btn-wrapper{@apply my-8 text-center}
-/* Desktop largo: cartão de margem ocupa a 3ª coluna do hero (sticky interno) */
-@media(min-width:1536px){.hero-grid{grid-template-columns:minmax(0,1fr) minmax(240px,300px) minmax(250px,320px);gap:2rem}.hero-contact{display:block;align-self:start;height:100%}.hero-contact :global(.contact-margin-card){position:sticky;top:1.25rem}.hero-photo{max-width:300px}}
-/* Mobile/tablet: caixa no fluxo, abaixo do hero e antes dos Destaques */
-@media(max-width:1535px){.hero-contact{display:block;margin-top:-1rem}}
-@media(max-width:639px){.hero-grid{display:flex;flex-direction:column;gap:2rem}.hero-text{order:1}.hero-photo{order:2}.hero-contact{order:3;width:100%;margin-top:0}.hero-contact :global(.contact-cta-card){padding:1.35rem}.hero-contact :global(.contact-cta-card h2){font-size:1.3rem}}
+#main-content{position:relative}#hero{@apply relative mx-auto w-full max-w-5xl overflow-visible px-4 pb-10 pt-10 sm:pt-14}.hero-shapes{@apply pointer-events-none absolute inset-0 overflow-hidden}.shape{@apply absolute block rounded-full}.shape-1{@apply -right-16 -top-16 h-56 w-56 bg-skin-accent opacity-[0.07] sm:h-72 sm:w-72}.shape-2{@apply -left-10 top-8 h-24 w-24 bg-skin-card-muted opacity-40 sm:h-32 sm:w-32}.shape-3{@apply bottom-4 left-1/4 h-16 w-16 bg-skin-accent opacity-[0.06]}.shape-4{@apply right-1/4 top-1/3 h-10 w-10 border-2 border-skin-accent opacity-20}.hero-grid{@apply relative grid items-center gap-10 sm:grid-cols-[1.2fr_1fr] sm:gap-12}.hero-text{@apply relative z-10}.hero-eyebrow{@apply mb-3 inline-block rounded-full border border-skin-line px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-skin-accent}#hero h1{@apply my-3 text-3xl font-bold leading-tight sm:text-5xl}.hero-intro{@apply my-4 max-w-md text-base leading-relaxed text-skin-base opacity-80}.hero-cta{@apply mt-6 flex items-center gap-4}.hero-btn{@apply inline-flex items-center rounded-full bg-skin-accent px-6 py-3 text-sm font-medium text-skin-inverted transition-colors hover:opacity-90}.hero-photo{@apply relative z-10 mx-auto w-full max-w-[280px] sm:max-w-[340px]}.photo-arc{@apply absolute -inset-3 -z-10;border-radius:50% 50% 45% 45% / 60% 60% 40% 40%;background-color:rgb(var(--color-accent));opacity:.12}.hero-photo img{@apply w-full rounded-[2rem] border-2 border-skin-line object-cover shadow-xl;aspect-ratio:2 / 3}.hero-contact-mobile{display:none}.contact-trail{display:none}.social-wrapper{@apply relative z-10 mt-8 flex flex-col gap-2 sm:flex-row sm:items-center}.social-links{@apply mr-2 whitespace-nowrap text-sm opacity-70}#featured,#recent-posts{@apply mx-auto w-full max-w-5xl px-4 pb-6 pt-12}#featured h2,#recent-posts h2{@apply text-2xl font-semibold tracking-wide}#featured ul{display:grid;grid-template-columns:1fr;gap:1.5rem;margin-top:1.5rem}@media(min-width:640px){#featured ul{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(min-width:1024px){#featured ul{grid-template-columns:repeat(3,minmax(0,1fr))}}#recent-posts ul{display:grid;grid-template-columns:1fr;gap:1.5rem}@media(min-width:640px){#recent-posts ul{grid-template-columns:repeat(2,minmax(0,1fr))}}.all-posts-btn-wrapper{@apply my-8 text-center}
+@media(min-width:1536px){.hero-contact-mobile{display:none}.contact-trail{display:block;position:absolute;top:1rem;left:calc(50% + 33rem);width:clamp(250px,calc(50vw - 34rem),320px);height:calc(100% - 1rem);z-index:20}.contact-trail .contact-margin-card{position:sticky;top:1.25rem}}
+@media(max-width:1535px){.hero-contact-mobile{display:block;margin-top:-1rem}.contact-trail{display:none}}
+@media(max-width:639px){.hero-grid{display:flex;flex-direction:column;gap:2rem}.hero-text{order:1}.hero-photo{order:2}.hero-contact-mobile{order:3;width:100%;margin-top:0}.hero-contact-mobile :global(.contact-cta-card){padding:1.35rem}.hero-contact-mobile :global(.contact-cta-card h2){font-size:1.3rem}}
 </style>

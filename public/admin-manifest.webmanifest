@@ -1,0 +1,19 @@
+{
+  "name": "Admin Salvio Gonçalves",
+  "short_name": "Admin Salvio",
+  "description": "Painel administrativo do blog Salvio Gonçalves",
+  "start_url": "/admin/",
+  "scope": "/admin/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f1ebe2",
+  "theme_color": "#4e6351",
+  "icons": [
+    {
+      "src": "/1789058902899-favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -86,12 +86,12 @@ const highlightPosts = [...related, ...featured, ...recent].slice(0, 3);
       {showToc && tocHeadings.length > 0 && <details class="toc-mobile"><summary>Neste artigo</summary><nav class="toc" aria-label="Sumário do artigo"><ul>{tocHeadings.map((h) => <li class:list={{ "toc-sub": h.depth === 3 }}><a href={`#${h.slug}`}>{h.text}</a></li>)}</ul></nav></details>}
       <article id="article" role="article" class="prose mt-8"><Content /></article>
       <ul class="my-8 flex flex-wrap gap-2">{tags.map(tag => <Tag tag={slugifyStr(tag)} />)}</ul>
+      <PostEngagement slug={post.slug} />
       <div class="flex flex-col-reverse items-center justify-between gap-6 sm:flex-row-reverse sm:items-end sm:gap-4">
         <button id="back-to-top" class="focus-outline whitespace-nowrap py-1 hover:opacity-75"><svg xmlns="http://www.w3.org/2000/svg" class="rotate-90"><path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z"></path></svg><span>Voltar ao topo</span></button>
         <ShareLinks />
       </div>
       {highlightPosts.length > 0 && <section class="related-posts"><h2>Destaques</h2><div class="related-grid">{highlightPosts.map(({ data, slug, body }) => { const imgSrc = typeof data.ogImage === "string" ? data.ogImage : data.ogImage?.src ?? getFirstImage(body ?? ""); return <a href={`/posts/${slug}/`} class="related-card"><div class="related-thumb">{imgSrc ? <img src={imgSrc} alt="" loading="lazy" /> : <span class="related-thumb-fallback" aria-hidden="true"></span>}</div><div class="related-body"><h3>{data.title}</h3><Datetime pubDatetime={data.pubDatetime} size="sm" /></div></a>; })}</div></section>}
-      <PostEngagement slug={post.slug} />
       <NewsletterBlock />
     </div>
   </main>

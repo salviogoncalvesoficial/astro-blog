@@ -20,8 +20,6 @@ const { compact = false, margin = false } = Astro.props;
   .contact-cta-card p:not(.contact-cta-kicker){margin:.8rem 0 1.2rem;line-height:1.6;color:rgb(var(--color-base)/.8)}
   .contact-cta-card a{display:inline-flex;align-items:center;gap:.45rem;border-radius:999px;background:rgb(var(--color-accent));padding:.7rem 1rem;color:rgb(var(--color-inverted));font-size:.85rem;font-weight:600;transition:opacity .2s ease}
   .contact-cta-card a:hover{opacity:.88}
-  /* Cartão de margem: sticky — nasce alinhado ao hero, sobe com a rolagem,
-     encosta no teto com respiro e permanece até o fim da página */
   .contact-margin-card{position:sticky;top:1.25rem}
   @media(min-width:1536px){
     .contact-margin-card h2{font-size:1.2rem}
@@ -32,5 +30,6 @@ const { compact = false, margin = false } = Astro.props;
   .contact-strip.is-visible{transform:translate(-50%,0)}
   .contact-strip strong{border-radius:999px;background:rgb(var(--color-accent));padding:.48rem .8rem;color:rgb(var(--color-inverted));font-size:.78rem;white-space:nowrap}
   @media(max-width:640px){.contact-strip{top:5.6rem;width:calc(100% - 1rem);padding:.55rem .65rem .55rem .9rem}.contact-strip>span{font-size:.78rem;line-height:1.2}.contact-strip strong{padding:.55rem .7rem;font-size:.74rem}}
+  @media(min-width:1536px){.contact-strip{display:none!important}}
   @media(prefers-reduced-motion:reduce){.contact-strip{transition:none}}
 </style>

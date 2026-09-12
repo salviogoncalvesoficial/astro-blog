@@ -26,10 +26,11 @@ const { compact = false, margin = false } = Astro.props;
     .contact-margin-card p:not(.contact-cta-kicker){font-size:.86rem;margin:.6rem 0 1rem}
     .contact-margin-card a{padding:.6rem .85rem;font-size:.78rem}
   }
-  .contact-strip{position:fixed;top:var(--contact-strip-top,8rem);left:50%;z-index:35;display:flex;width:min(50rem,calc(100% - 2rem));transform:translate(-50%,-160%);align-items:center;justify-content:space-between;gap:1rem;border:1px solid rgb(var(--color-line));border-radius:999px;background:rgb(var(--color-card)/.96);padding:.65rem 1rem .65rem 1.2rem;box-shadow:0 10px 28px rgb(var(--color-base)/.14);backdrop-filter:blur(12px);color:rgb(var(--color-base));transition:transform .35s ease}
+  /* Faixa compacta: repousa no topo da tela com respiro pequeno e constante,
+     como um mini-header — sem lacunas nem posição variável */
+  .contact-strip{position:fixed;top:.6rem;left:50%;z-index:35;display:flex;width:min(50rem,calc(100% - 1rem));transform:translate(-50%,-200%);align-items:center;justify-content:space-between;gap:1rem;border:1px solid rgb(var(--color-line));border-radius:999px;background:rgb(var(--color-card)/.96);padding:.6rem .75rem .6rem 1.1rem;box-shadow:0 8px 24px rgb(var(--color-base)/.16);backdrop-filter:blur(12px);color:rgb(var(--color-base));transition:transform .3s ease}
   .contact-strip.is-visible{transform:translate(-50%,0)}
-  .contact-strip strong{border-radius:999px;background:rgb(var(--color-accent));padding:.48rem .8rem;color:rgb(var(--color-inverted));font-size:.78rem;white-space:nowrap}
-  @media(max-width:640px){.contact-strip{top:5.6rem;width:calc(100% - 1rem);padding:.55rem .65rem .55rem .9rem}.contact-strip>span{font-size:.78rem;line-height:1.2}.contact-strip strong{padding:.55rem .7rem;font-size:.74rem}}
+  .contact-strip strong{border-radius:999px;background:rgb(var(--color-accent));padding:.5rem .8rem;color:rgb(var(--color-inverted));font-size:.78rem;white-space:nowrap}
   @media(min-width:1536px){.contact-strip{display:none!important}}
   @media(prefers-reduced-motion:reduce){.contact-strip{transition:none}}
 </style>

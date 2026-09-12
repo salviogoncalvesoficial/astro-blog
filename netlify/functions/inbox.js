@@ -19,13 +19,18 @@ function checkToken(token) {
 function json(code, obj) {
   return { statusCode: code, headers: { "Content-Type": "application/json" }, body: JSON.stringify(obj) };
 }
+// Chaves técnicas guardadas no mesmo store (não são e-mails)
+const RESERVED_KEYS = new Set(["signature"]);
+const looksLikeEmail = (d) => d && typeof d === "object" && (d.subject !== undefined || d.from !== undefined || d.to !== undefined || d.sentAt || d.receivedAt);
+
 async function listMessages() {
   const store = getStore("inbox");
   const { blobs } = await store.list();
   const msgs = [];
   for (const blob of blobs) {
+    if (RESERVED_KEYS.has(blob.key)) continue;
     const data = await store.get(blob.key, { type: "json" });
-    if (data) msgs.push({ folder: "inbox", favorite: false, ...data });
+    if (data && looksLikeEmail(data)) msgs.push({ folder: "inbox", favorite: false, ...data });
   }
   msgs.sort((a, b) => (b.receivedAt ?? b.sentAt ?? "").localeCompare(a.receivedAt ?? a.sentAt ?? ""));
   return msgs;

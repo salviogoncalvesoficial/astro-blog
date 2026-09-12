@@ -18,7 +18,7 @@ const { frontmatter } = Astro.props;
   <Breadcrumbs />
   <main id="main-content">
     <h1 class="about-title">{frontmatter.title}</h1>
-    <!-- Hero: foto + texto de apresentação lado a lado -->
+    <!-- Hero: foto + texto de apresentação lado a lado, texto centrado na vertical -->
     <section class="about-hero">
       <div class="about-photo">
         <img
@@ -41,7 +41,7 @@ const { frontmatter } = Astro.props;
     <section id="about" class="prose about-body prose-img:border-0">
       <slot />
     </section>
-    <!-- Convite final: caixa de agendamento semelhante à da home -->
+    <!-- Convite final: caixa de agendamento em largura total da leitura -->
     <section class="about-cta" aria-label="Agende uma conversa">
       <ContactCta />
     </section>
@@ -55,7 +55,7 @@ const { frontmatter } = Astro.props;
   .about-title {
     @apply text-2xl font-semibold tracking-wider text-skin-accent sm:text-3xl;
   }
-  /* ===== Hero em duas colunas ===== */
+  /* ===== Hero em duas colunas, texto centrado verticalmente ===== */
   .about-hero {
     @apply mt-8 grid grid-cols-1 items-center gap-8;
   }
@@ -68,7 +68,7 @@ const { frontmatter } = Astro.props;
     @apply w-full rounded-2xl border border-skin-line object-cover;
   }
   .about-intro {
-    @apply text-base leading-relaxed opacity-90 sm:text-lg;
+    @apply self-center text-base leading-relaxed opacity-90 sm:text-lg;
   }
   .about-greeting {
     @apply mb-3 text-lg font-semibold text-skin-accent sm:text-xl;
@@ -77,8 +77,8 @@ const { frontmatter } = Astro.props;
   .about-body {
     @apply mt-12 max-w-none;
   }
-  /* ===== Convite final ===== */
+  /* ===== Convite final: largura total da área de leitura ===== */
   .about-cta {
-    @apply mt-14 max-w-md;
+    @apply mt-14;
   }
 </style>

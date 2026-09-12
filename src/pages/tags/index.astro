@@ -5,6 +5,7 @@ import Footer from "@components/Footer.astro";
 import Layout from "@layouts/Layout.astro";
 import Main from "@layouts/Main.astro";
 import Tag from "@components/Tag.astro";
+import ContactCta from "@components/ContactCta.astro";
 import getUniqueTags from "@utils/getUniqueTags";
 import { SITE } from "@config";
 const posts = await getCollection("blog");
@@ -12,6 +13,7 @@ let tags = getUniqueTags(posts);
 ---
 <Layout title={`Temas | ${SITE.title}`}>
   <Header activeNav="tags" />
+  <ContactCta compact docked />
   <Main pageTitle="Temas" pageDesc="Todos os temas dos meus artigos.">
     <ul>
       {tags.map(({ tag }) => <Tag {tag} size="lg" />)}
